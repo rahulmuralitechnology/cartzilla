@@ -1,0 +1,122 @@
+version: "3.9"
+
+networks:
+  bloom:
+    external: true
+
+# Base anchors so we can keep things DRY
+x-svc-base: &svc_base
+  networks: [bloom]
+  env_file: [.env]
+
+x-deploy-base: &deploy_base
+  replicas: 1
+  restart_policy:
+    condition: on-failure
+    delay: 5s
+    max_attempts: 3
+  update_config:
+    order: start-first
+    parallelism: 1
+    delay: 5s
+  rollback_config:
+    order: stop-first
+    parallelism: 1
+  placement:
+    constraints:
+      - node.labels.group == core
+
+services:
+  # ---------- Public entrypoint ----------
+  api-gateway:
+    image: registry.bloomi5.com/api-gateway:dev
+    <<: *svc_base
+    environment:
+      PORT: 3000
+      API_PREFIX: /api/v1
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      PRODUCT_SERVICE_URL: http://product-service:3003
+      ORDER_SERVICE_URL: http://order-service:3004
+      STORE_SERVICE_URL: http://store-service:3005
+      CONTENT_SERVICE_URL: http://content-service:3006
+      CONFIG_SERVICE_URL: http://config-service:3007
+      SHIPPING_SERVICE_URL: http://shipping-service:3008
+      ERP_SERVICE_URL: http://erp-service:3009
+      UTILITY_SERVICE_URL: http://utility-service:3010
+    deploy:
+      <<: *deploy_base
+      labels:
+        - traefik.enable=true
+        - traefik.swarm.network=bloom
+
+        # Router -> use TLS-ALPN resolver
+        - traefik.http.routers.apigw.rule=Host(`dev-api.bloomi5.com`)
+        - traefik.http.routers.apigw.entrypoints=websecure
+        - traefik.http.routers.apigw.tls=true
+        - traefik.http.routers.apigw.tls.certresolver=leTls
+
+        # Service mapping to container port 3000
+        - traefik.http.services.apigw.loadbalancer.server.port=3000
+        - traefik.http.routers.apigw.service=apigw
+
+  # ---------- Internal microservices (no public routes) ----------
+  auth-service:
+    image: registry.bloomi5.com/auth-service:dev
+    <<: *svc_base
+    environment: { PORT: 3001 }
+    deploy: { <<: *deploy_base }
+
+  user-service:
+    image: registry.bloomi5.com/user-service:dev
+    <<: *svc_base
+    environment: { PORT: 3002 }
+    deploy: { <<: *deploy_base }
+
+  product-service:
+    image: registry.bloomi5.com/product-service:dev
+    <<: *svc_base
+    environment: { PORT: 3003 }
+    deploy: { <<: *deploy_base }
+
+  order-service:
+    image: registry.bloomi5.com/order-service:dev
+    <<: *svc_base
+    environment: { PORT: 3004 }
+    deploy: { <<: *deploy_base }
+
+  store-service:
+    image: registry.bloomi5.com/store-service:dev
+    <<: *svc_base
+    environment: { PORT: 3005 }
+    deploy: { <<: *deploy_base }
+
+  content-service:
+    image: registry.bloomi5.com/content-service:dev
+    <<: *svc_base
+    environment: { PORT: 3006 }
+    deploy: { <<: *deploy_base }
+
+  config-service:
+    image: registry.bloomi5.com/config-service:dev
+    <<: *svc_base
+    environment: { PORT: 3007 }
+    deploy: { <<: *deploy_base }
+
+  shipping-service:
+    image: registry.bloomi5.com/shipping-service:dev
+    <<: *svc_base
+    environment: { PORT: 3008 }
+    deploy: { <<: *deploy_base }
+
+  erp-service:
+    image: registry.bloomi5.com/erp-service:dev
+    <<: *svc_base
+    environment: { PORT: 3009 }
+    deploy: { <<: *deploy_base }
+
+  utility-service:
+    image: registry.bloomi5.com/utility-service:dev
+    <<: *svc_base
+    environment: { PORT: 3010 }
+    deploy: { <<: *deploy_base }

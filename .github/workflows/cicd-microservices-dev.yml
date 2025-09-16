@@ -1,0 +1,237 @@
+name: CI/CD - Microservices Backend (dev)
+
+on:
+  push:
+    branches: [ dev ]
+  workflow_dispatch:
+    inputs:
+      only_services:
+        description: "Space-separated services to build/deploy (optional)"
+        required: false
+        default: ""
+
+concurrency:
+  group: microservices-dev
+  cancel-in-progress: true
+
+env:
+  ALL_SERVICES: "api-gateway auth-service user-service product-service order-service store-service content-service config-service shipping-service erp-service utility-service"
+  IMAGE_TAG: dev
+  STACK_NAME: backend
+
+jobs:
+  detect_changes:
+    name: Detect changed services
+    runs-on: bloom
+    environment: dev
+    outputs:
+      services_json: ${{ steps.set.outputs.services_json }}
+      services_space: ${{ steps.set.outputs.services_space }}
+      compose_changed: ${{ steps.set.outputs.compose_changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Paths filter
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            api-gateway:
+              - 'api-gateway/**'
+            auth-service:
+              - 'auth-service/**'
+            user-service:
+              - 'user-service/**'
+            product-service:
+              - 'product-service/**'
+            order-service:
+              - 'order-service/**'
+            store-service:
+              - 'store-service/**'
+            content-service:
+              - 'content-service/**'
+            config-service:
+              - 'config-service/**'
+            shipping-service:
+              - 'shipping-service/**'
+            erp-service:
+              - 'erp-service/**'
+            utility-service:
+              - 'utility-service/**'
+            compose:
+              - 'backend.dev.yml'
+              - 'backend.stack.template.yml'
+              - 'backend.template.yml'
+              - 'backend.yml'
+              - 'docker-stack*.yml'
+
+      - name: Build matrix + outputs (manual selection supported)
+        id: set
+        shell: bash
+        run: |
+          changed=()
+
+          # 1) Manual selection: only_services="svc1 svc2"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.only_services }}" ]]; then
+            allowed="${{ env.ALL_SERVICES }}"
+            for svc in ${{ inputs.only_services }}; do
+              echo "$allowed" | grep -qw "$svc" && changed+=("$svc")
+            done
+          else
+            # 2) Normal push: detect changed dirs
+            if [[ "${{ steps.changes.outputs.api-gateway }}" == "true" ]]; then changed+=("api-gateway"); fi
+            if [[ "${{ steps.changes.outputs.auth-service }}" == "true" ]]; then changed+=("auth-service"); fi
+            if [[ "${{ steps.changes.outputs.user-service }}" == "true" ]]; then changed+=("user-service"); fi
+            if [[ "${{ steps.changes.outputs.product-service }}" == "true" ]]; then changed+=("product-service"); fi
+            if [[ "${{ steps.changes.outputs.order-service }}" == "true" ]]; then changed+=("order-service"); fi
+            if [[ "${{ steps.changes.outputs.store-service }}" == "true" ]]; then changed+=("store-service"); fi
+            if [[ "${{ steps.changes.outputs.content-service }}" == "true" ]]; then changed+=("content-service"); fi
+            if [[ "${{ steps.changes.outputs.config-service }}" == "true" ]]; then changed+=("config-service"); fi
+            if [[ "${{ steps.changes.outputs.shipping-service }}" == "true" ]]; then changed+=("shipping-service"); fi
+            if [[ "${{ steps.changes.outputs.erp-service }}" == "true" ]]; then changed+=("erp-service"); fi
+            if [[ "${{ steps.changes.outputs.utility-service }}" == "true" ]]; then changed+=("utility-service"); fi
+          fi
+
+          if [[ ${#changed[@]} -eq 0 ]]; then
+            json='[]'
+            space=''
+          else
+            json='['
+            for s in "${changed[@]}"; do json="${json}\"$s\","; done
+            json="${json%,}"
+            json="${json}]"
+            space="${changed[*]}"
+          fi
+
+          echo "services_json=$json"   >> "$GITHUB_OUTPUT"
+          echo "services_space=$space" >> "$GITHUB_OUTPUT"
+          echo "compose_changed=${{ steps.changes.outputs.compose }}" >> "$GITHUB_OUTPUT"
+
+  build_and_push:
+    name: Build & push (${{ matrix.service }}) → dev
+    needs: detect_changes
+    if: ${{ needs.detect_changes.outputs.services_json != '[]' }}
+    runs-on: bloom
+    environment: dev
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        service: ${{ fromJSON(needs.detect_changes.outputs.services_json) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Registry
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Build image
+        run: |
+          docker build \
+            -t ${{ secrets.REGISTRY_NAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }} \
+            -f ${{ matrix.service }}/Dockerfile ${{ matrix.service }}
+
+      - name: Push image
+        run: docker push ${{ secrets.REGISTRY_NAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+
+      - name: Cleanup local image
+        run: docker rmi -f ${{ secrets.REGISTRY_NAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }} || true
+
+  deploy:
+    name: Deploy -> dev (Swarm)
+    needs: [detect_changes, build_and_push]
+    if: ${{ needs.detect_changes.outputs.services_space != '' || needs.detect_changes.outputs.compose_changed == 'true' }}
+    runs-on: bloom
+    environment: dev
+    env:
+      CHANGED_SERVICES: ${{ needs.detect_changes.outputs.services_space }}
+      COMPOSE_CHANGED: ${{ needs.detect_changes.outputs.compose_changed }}
+    steps:
+      - name: Checkout (stack file)
+        uses: actions/checkout@v4
+
+      - name: Pick stack file & render (if template)
+        id: pick
+        shell: bash
+        run: |
+          set -e
+          # Prefer dev-specific file, then templates, then plain backend.yml
+          if   [[ -f backend.dev.yml ]]; then TEMPLATE=backend.dev.yml
+          elif [[ -f backend.stack.template.yml ]]; then TEMPLATE=backend.stack.template.yml
+          elif [[ -f backend.template.yml ]]; then TEMPLATE=backend.template.yml
+          elif [[ -f backend.yml ]]; then TEMPLATE=backend.yml
+          else
+            echo "No backend stack file found"; exit 1
+          fi
+          echo "TEMPLATE_FILE=$TEMPLATE" >> $GITHUB_ENV
+
+          # If it's a template, render with envsubst; else just copy
+          case "$TEMPLATE" in
+            backend.stack.template.yml|backend.template.yml)
+              BACKEND_DOMAIN="${{ secrets.BACKEND_DOMAIN }}" \
+              REGISTRY_NAME="${{ secrets.REGISTRY_NAME }}" \
+              IMAGE_TAG="${{ env.IMAGE_TAG }}" \
+              envsubst < "$TEMPLATE" > backend.rendered.yml
+              ;;
+            *)
+              cp "$TEMPLATE" backend.rendered.yml
+              ;;
+          esac
+
+      - name: Upload backend.rendered.yml to VM
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DEV_VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "backend.rendered.yml"
+          target: "/${{ secrets.VM_USER }}/bloom/bloomi5_ecom_backend_microservices"
+
+      - name: Swarm deploy on remote VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEV_VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          # Forward the env vars your script relies on:
+          envs: STACK_NAME,IMAGE_TAG,CHANGED_SERVICES,COMPOSE_CHANGED
+          script: |
+            set -euo pipefail
+            # Provide sane defaults if any env is missing (belt & suspenders)
+            : "${STACK_NAME:=backend}"
+            : "${IMAGE_TAG:=dev}"
+            : "${CHANGED_SERVICES:=}"
+            : "${COMPOSE_CHANGED:=}"
+
+            BASE="/${{ secrets.VM_USER }}/bloom/bloomi5_ecom_backend_microservices"
+            cd "$BASE"
+
+            # Use a consistent canonical name on the server
+            mv -f backend.rendered.yml backend.yml
+
+            # Login so nodes can pull private images
+            echo "${{ secrets.REGISTRY_PASSWORD }}" \
+              | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+            # Reconcile the stack (idempotent)
+            docker stack deploy -c backend.yml "$STACK_NAME" --with-registry-auth
+
+            # Roll only changed services to pull new :dev digest
+            if [ -n "$CHANGED_SERVICES" ]; then
+              for SVC in $CHANGED_SERVICES; do
+                echo "==== Rolling $SVC ===="
+                docker service update \
+                  --with-registry-auth \
+                  --image ${{ secrets.REGISTRY_NAME }}/$SVC:$IMAGE_TAG \
+                  --force \
+                  ${STACK_NAME}_${SVC}
+              done
+            elif [ "$COMPOSE_CHANGED" = "true" ]; then
+              echo "Compose changed only → stack reconciled."
+            else
+              echo "Nothing to roll."
+            fi
+
+            # Quick status
+            docker stack services "$STACK_NAME"

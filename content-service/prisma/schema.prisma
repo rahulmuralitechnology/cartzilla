@@ -1,0 +1,911 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+// User-related models
+enum UserRole {
+  ADMIN
+  USER
+  CLIENT
+  CUSTOMER
+  SUPERADMIN
+}
+
+model User {
+  id               String   @id @default(uuid()) @db.Uuid
+  email            String
+  username         String?
+  organizationName String?
+  profileImage     String?
+  password         String
+  salt             String?
+  verified         Boolean  @default(false)
+  role             UserRole
+  phone            String?
+  whatsapp         String?
+  whatsappOptIn    Boolean? @default(false)
+  storeId          String?
+  tenantId         String?
+  googleId         String?
+  source           String?
+  isActive         Boolean  @default(false)
+  otp              Otp?
+  permissions      Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  Store         Store[]
+  Address       Address[]
+  carts         Cart[]
+  discountUsage DiscountUsage[] // Track discount usage per user
+  orders        Order[]
+
+  ThemeRequest ThemeRequest[]
+
+  Blog Blog[]
+
+  ShiprocketOrder ShippingOrder[]
+}
+
+model ContactSubmission {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String
+  message   String
+  storeId   String
+  createdAt DateTime @default(now())
+}
+
+model Otp {
+  id        String   @id @default(uuid()) @db.Uuid
+  code      String
+  expiresAt DateTime
+  userId    String   @unique @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// Store-related models
+model Store {
+  id                    String    @id @default(uuid()) @db.Uuid
+  name                  String
+  description           String?
+  logo                  String?
+  storeCategory         String?
+  userId                String    @db.Uuid
+  subdomain             String    @unique
+  domain                String?
+  isCustomDomain        Boolean   @default(false)
+  uniqueId              String?
+  ipAddress             String?
+  isPublished           Boolean   @default(false)
+  publishUrl            String    @default("")
+  previewUrl            String    @default("")
+  seoTitle              String?
+  seoDescription        String?
+  appType               String?
+  siteType              String?
+  buildStatus           Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  favicon               String?
+  currentVersion        String?
+  latestVersion         String?
+  couponCode            String?
+  subscriptionPlanId    String?   @db.Uuid
+  subscriptionStartDate DateTime?
+  subscriptionEndDate   DateTime?
+  razorpayOrderId       String?
+  razorpayPaymentId     String?
+  isAnnualSubscription  Boolean?
+
+  paymentStatus    String?        @default("INACTIVE")
+  user             User           @relation(fields: [userId], references: [id])
+  subscriptionPlan Plan?          @relation(fields: [subscriptionPlanId], references: [id])
+  products         Product[]
+  SiteConfig       SiteConfig[]
+  customScript     customScript[]
+  carts            Cart[]
+  discounts        Discount[] // Store can have many discounts
+  MenuItem         MenuItem[]
+  orders           Order[] // Store can have many discounts
+  reservations     Reservation[] // Add this line to include the relation to Reservation
+
+  // New relations for payment features
+  paymentMethods         PaymentMethod[]
+  upiTransactions        UPITransaction[]
+  Blog                   Blog[]
+  PortalCouponRedemption PortalCouponRedemption[]
+  ShiprocketAuth         ShiprocketAuth[]
+  ShippingInfo           ShippingInfo[]
+  SectionBuilder         SectionBuilder[]
+  RobotsTxt              RobotsTxt[]
+  StoreErpNext           StoreErpNext[]
+
+  @@index([userId])
+  @@index([subscriptionPlanId])
+}
+
+model SiteConfig {
+  id         String   @id @default(uuid()) @db.Uuid
+  storeId    String   @db.Uuid
+  name       String?
+  siteConfig Json
+  type       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  store      Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+}
+
+model customScript {
+  id        String   @id @default(uuid()) @db.Uuid
+  storeId   String   @db.Uuid
+  scripts   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+}
+
+// Product-related models
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Product {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @db.Uuid
+  storeId            String   @db.Uuid
+  title              String
+  description        String
+  categoryId         String?  @db.Uuid
+  category           String?
+  subCategoryId      String?  @db.Uuid
+  price              Float?
+  strikePrice        Float?
+  discountPercentage Float?   @default(0)
+  rating             Float?   @default(0)
+  stock              Int?     @default(0)
+  tags               String[]
+  brand              String?
+  sku                String?
+  weight             Float?
+  umo                String?
+  umoValue           Int?
+  dimensions         Json?
+
+  // NEW FIELDS FOR BETTER INVENTORY MANAGEMENT
+  reservedStock   Int?      @default(0) // Stock reserved for pending orders
+  availableStock  Int?      @default(0) // Calculated: stock - reservedStock
+  reorderLevel    Int?      @default(5) // When to reorder (replaces minimumOrderQuantity concept)
+  maxStockLevel   Int? // Maximum stock to maintain
+  lastStockUpdate DateTime?
+
+  warrantyInformation    String?
+  shippingInformation    String?
+  availabilityStatus     String?
+  reviews                Json?
+  variants               Json?
+  returnPolicy           String?
+  minimumOrderQuantity   Int?
+  sellEvenInZeroQuantity Boolean?            @default(false)
+  meta                   Json?
+  images                 String[]
+  thumbnail              String?
+  status                 ProductStatus       @default(DRAFT)
+  hsnCode                String?
+  gstRate                Float?
+  gstInclusive           Boolean?            @default(false)
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  store                  Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  categorymap            ProductCategory?    @relation(fields: [categoryId], references: [id])
+  subCategory            ProductSubCategory? @relation(fields: [subCategoryId], references: [id])
+  cartItems              CartItem[]
+  orderItems             OrderItem[]
+  StockHistory           StockHistory[]
+  StockReservation       StockReservation[]
+
+  @@index([userId])
+  @@index([storeId])
+  @@index([categoryId])
+  @@index([subCategoryId])
+  @@index([sku]) // NEW: Index for SKU lookups
+  @@index([availabilityStatus]) // NEW: Index for availability queries
+  @@index([reorderLevel]) // NEW: Index for low stock queries
+}
+
+model ProductCategory {
+  id            String               @id @default(uuid()) @db.Uuid
+  storeId       String               @db.Uuid
+  userId        String               @db.Uuid
+  name          String
+  description   String?
+  categoryImage String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime?            @updatedAt
+  products      Product[]
+  subCategories ProductSubCategory[]
+
+  @@index([storeId])
+  @@index([userId])
+}
+
+model ProductSubCategory {
+  id          String          @id @default(uuid()) @db.Uuid
+  categoryId  String          @db.Uuid
+  name        String
+  description String?
+  image       String?
+  createdAt   DateTime        @default(now())
+  category    ProductCategory @relation(fields: [categoryId], references: [id])
+  products    Product[]
+
+  @@index([categoryId])
+}
+
+// Address model
+model Address {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  name         String
+  line1        String
+  line2        String?
+  city         String
+  state        String
+  zip          String
+  country      String
+  phone        String
+  isDefault    Boolean  @default(false)
+  addressType  String?
+  landmark     String?
+  instructions String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+
+  // Relations for cart addresses
+  billingAddressForCarts  Cart[] @relation("BillingAddress")
+  shippingAddressForCarts Cart[] @relation("ShippingAddress")
+
+  // Relations for order addresses
+  billingAddressForOrders  Order[] @relation("OrderBillingAddress")
+  shippingAddressForOrders Order[] @relation("OrderShippingAddress")
+
+  @@index([userId])
+}
+
+// Cart-related models
+enum CartStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+model Cart {
+  id         String     @id @default(uuid()) @db.Uuid
+  cartId     String     @unique // Custom cart ID format: cart-userId-timestamp
+  userId     String     @db.Uuid
+  storeId    String     @db.Uuid
+  items      CartItem[]
+  totalPrice Float      @default(0)
+  status     CartStatus @default(ACTIVE)
+
+  // Address relations
+  billingAddressId  String?  @db.Uuid
+  shippingAddressId String?  @db.Uuid
+  billingAddress    Address? @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  shippingAddress   Address? @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+
+  // Discount relation
+  appliedDiscountId String?   @db.Uuid
+  appliedDiscount   Discount? @relation(fields: [appliedDiscountId], references: [id])
+  discountAmount    Float? // Amount of discount applied
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([storeId])
+  @@index([billingAddressId])
+  @@index([shippingAddressId])
+  @@index([appliedDiscountId])
+}
+
+model CartItem {
+  id                String   @id @default(uuid()) @db.Uuid
+  cartId            String   @db.Uuid
+  productId         String   @db.Uuid
+  quantity          Int
+  price             Float
+  totalPrice        Float
+  gstRate           Float    @default(0)
+  gstAmount         Float    @default(0)
+  totalPriceWithGST Float
+  name              String
+  images            String[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  cart              Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([cartId])
+  @@index([productId])
+}
+
+// Discount-related models
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+model Discount {
+  id                 String       @id @default(uuid()) @db.Uuid
+  name               String
+  description        String?
+  code               String       @unique
+  showOnCheckout     Boolean      @default(true)
+  storeId            String?      @db.Uuid
+  products           String[] // Array of product IDs
+  discountType       DiscountType // "PERCENTAGE" or "FIXED"
+  value              Float
+  minOrderAmount     Float?
+  maxDiscountAmount  Float?
+  expiryDate         DateTime
+  customerUsageLimit Int?
+  include            String[] // Array of product IDs to include
+  exclude            String[] // Array of product IDs to exclude
+  active             Boolean      @default(true)
+  limited            Boolean
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  // Relations
+  store          Store?          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  appliedToCarts Cart[]
+  usageHistory   DiscountUsage[]
+
+  @@index([storeId])
+}
+
+model DiscountUsage {
+  id          String   @id @default(uuid()) @db.Uuid
+  discountId  String   @db.Uuid
+  userId      String   @db.Uuid
+  usedAt      DateTime @default(now())
+  orderId     String?  @db.Uuid // Optional reference to an order
+  amountSaved Float
+
+  // Relations
+  discount Discount @relation(fields: [discountId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@index([discountId])
+  @@index([userId])
+}
+
+// Order-related models
+enum OrderStatus {
+  PACKED
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PAYMENT_PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum PaymentMode {
+  RAZORPAY
+  CASH
+  BANK_TRANSFER
+  UPI
+  PICKUP
+}
+
+model Order {
+  id              String        @id @default(uuid()) @db.Uuid
+  userId          String        @db.Uuid
+  storeId         String        @db.Uuid
+  totalAmount     Float
+  paymentMode     PaymentMode
+  paymentStatus   PaymentStatus @default(PAYMENT_PENDING)
+  orderDate       DateTime      @default(now())
+  status          OrderStatus   @default(CONFIRMED)
+  username        String?
+  shippingCost    Int?          @default(0)
+  trackingNo      String?
+  deliveryPartner String?
+  orderId         String?
+
+  // Address relations
+  billingAddressId  String?  @db.Uuid
+  shippingAddressId String?  @db.Uuid
+  billingAddress    Address? @relation("OrderBillingAddress", fields: [billingAddressId], references: [id])
+  shippingAddress   Address? @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id])
+
+  // Payment details
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+
+  // Device information
+  userAgent  String?
+  deviceType String?
+
+  // Relations
+  user            User             @relation(fields: [userId], references: [id])
+  store           Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orderItems      OrderItem[]
+  orderLog        OrderLog?
+  upiTransactions UPITransaction[]
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  StockHistory     StockHistory[]
+  StockReservation StockReservation[]
+  ShiprocketOrder  ShippingOrder[]
+
+  @@index([userId])
+  @@index([storeId])
+  @@index([billingAddressId])
+  @@index([shippingAddressId])
+}
+
+model OrderItem {
+  id                String   @id @default(uuid()) @db.Uuid
+  orderId           String   @db.Uuid
+  productId         String   @db.Uuid
+  productName       String
+  productImages     String[]
+  quantity          Int
+  price             Float
+  gstRate           Float    @default(0)
+  gstAmount         Float    @default(0)
+  totalPriceWithGST Float
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderLog {
+  id            String      @id @default(uuid()) @db.Uuid
+  orderId       String      @unique @db.Uuid
+  latestStatus  OrderStatus
+  statusHistory Json[]
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+}
+
+model MenuItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  storeId     String   @db.Uuid
+  userId      String   @db.Uuid
+  name        String
+  description String?
+  price       Float
+  image       String?
+  dietary     Json?
+  category    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([userId])
+}
+
+model Plan {
+  id                 String   @id @default(uuid()) @db.Uuid
+  key                String? // Optional: Unique key for the plan (e.g., "starter")
+  name               String   @unique
+  description        String? // Optional: Description of the plan
+  icon               String? // Optional: Icon representation (could be a name or SVG string)
+  freeTrial          String? // Optional: Free trial duration (e.g., "60 days")
+  monthlyPrice       Float? // Optional: Monthly price
+  annualPrice        Float? // Optional: Annual price
+  savings            Float? // Optional: Savings on annual plan
+  features           Json? // Optional: Array of features included in the plan
+  featuresValidation Json? // Optional: Array of features included in the plan
+  perfectFor         String[] // Optional: Array of descriptions for ideal users
+  buttonText         String? // Optional: Button text for UI
+  className          String? // Optional: CSS class name for styling
+  popular            Boolean?
+  gradient           String? // Optional: Gradient string for UI
+  price              Float // Kept for compatibility, but can be deprecated if using monthlyPrice/annualPrice
+  durationDays       Int // Kept for compatibility, but can be deprecated if using freeTrial
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  Store Store[]
+}
+
+model Reservation {
+  id              String   @id @default(uuid()) @db.Uuid
+  storeId         String   @db.Uuid
+  date            String
+  time            String
+  guests          Int
+  occasion        String?
+  name            String
+  email           String
+  phone           String?
+  specialRequests String?
+  toEmail         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade) // Add this line to define the relation to Store
+
+  @@index([storeId])
+}
+
+model ThemeRequest {
+  id             String   @id @default(uuid()) @db.Uuid
+  createdAt      DateTime @default(now())
+  businessName   String
+  additionalInfo String
+  references     String?
+  storeCategory  String
+  email          String
+  userId         String   @db.Uuid
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+// New payment-related models
+model PaymentMethod {
+  id             String   @id @default(uuid()) @db.Uuid
+  storeId        String   @unique @db.Uuid
+  paymentMethods String[]
+  upi            Json?
+  cash           Json?
+  pickup         Json?
+  razorpay       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  store          Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+}
+
+model UPITransaction {
+  id            String   @id @default(uuid()) @db.Uuid
+  transactionId String   @unique
+  orderId       String   @db.Uuid
+  storeId       String   @db.Uuid
+  email         String?
+  createdAt     DateTime @default(now())
+  store         Store    @relation(fields: [storeId], references: [id])
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([orderId])
+}
+
+model Payment {
+  id                String    @id @default(uuid())
+  orderId           String
+  paymentId         String    @unique
+  merchantAccountId String
+  amount            Int
+  currency          String    @default("INR")
+  status            String
+  paymentMethod     String
+  email             String
+  contact           String
+  receipt           String?
+  notes             Json?
+  capturedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  logs PaymentLog[]
+}
+
+model PaymentLog {
+  id        String   @id @default(uuid())
+  paymentId String
+  event     String
+  payload   Json
+  createdAt DateTime @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [paymentId])
+}
+
+model TemplateVersion {
+  id            String   @id @default(uuid()) @db.Uuid
+  type          String
+  storeCategory String
+  repoDirName   String
+  latestVersion String   @default("0.0.0")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum TemplateType {
+  webapp
+  website
+  portfolio
+}
+
+model Template {
+  id             String       @id @default(uuid()) @db.Uuid
+  userId         String?
+  name           String
+  repoDirName    String       @unique
+  templateType   TemplateType
+  latestVersion  String       @default("0.0.0")
+  currentVersion String?
+  previewImage   String?
+  previewUrl     String?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Blog {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String
+  summary     String
+  content     String    @db.Text
+  category    String
+  isPublished Boolean   @default(true)
+  coverImage  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  userId  String @db.Uuid
+  user    User   @relation(fields: [userId], references: [id])
+  storeId String @db.Uuid
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([id, storeId, createdAt])
+}
+
+enum PortalCouponType {
+  FIXED
+  PERCENTAGE
+}
+
+model PortalCoupon {
+  id              String   @id @default(uuid()) @db.Uuid
+  code            String   @unique
+  description     String?
+  startDate       DateTime
+  endDate         DateTime
+  userRedemption  Int      @default(1) // Track how many times a single user can use this coupon
+  totalRedemption Int      @default(100) // Track total number of times coupon can be used across all users
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Optional fields
+  minimumPurchase Float? // Minimum purchase amount required to use coupon
+  discountAmount  Float? // Fixed amount or percentage discount
+  discountType    PortalCouponType? @default(FIXED)
+  maxDiscount     Float? // Maximum discount amount when using percentage
+
+  // Redemption tracking
+  redemptionLogs PortalCouponRedemption[]
+}
+
+model ShiprocketAuth {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String
+  password  String
+  storeId   String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+}
+
+model PortalCouponRedemption {
+  id          String   @id @default(uuid()) @db.Uuid
+  couponId    String   @db.Uuid
+  userId      String
+  storeId     String   @db.Uuid
+  usedAt      DateTime @default(now())
+  totalAmount Float // Total amount of the order when coupon was used
+  amount      Float // Amount saved using this coupon
+
+  // Relations
+  coupon PortalCoupon @relation(fields: [couponId], references: [id])
+  store  Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([couponId])
+  @@index([userId])
+}
+
+// UPDATED AVAILABILITY STATUS ENUM
+enum AvailabilityStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+  BACKORDER
+  DISCONTINUED
+  PRE_ORDER
+  COMING_SOON
+}
+
+// NEW: Stock History Model
+model StockHistory {
+  id            String          @id @default(uuid()) @db.Uuid
+  productId     String          @db.Uuid
+  userId        String          @db.Uuid
+  storeId       String          @db.Uuid
+  previousStock Int?
+  newStock      Int
+  changeAmount  Int // newStock - previousStock
+  changeType    StockChangeType
+  reason        String?
+  notes         String?
+  orderId       String?         @db.Uuid // Link to order if stock change is due to order
+  createdBy     String?         @db.Uuid // User who made the change
+  createdAt     DateTime        @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order   Order?  @relation(fields: [orderId], references: [id])
+
+  @@index([productId])
+  @@index([userId])
+  @@index([storeId])
+  @@index([changeType])
+  @@index([createdAt])
+}
+
+enum StockChangeType {
+  MANUAL_ADJUSTMENT
+  ORDER_PLACED // Stock reserved when order is placed
+  ORDER_CONFIRMED // Stock deducted when order is confirmed
+  ORDER_CANCELLED // Stock released when order is cancelled
+  ORDER_RETURNED // Stock added back when order is returned
+  PURCHASE_RECEIVED // Stock added when new inventory arrives
+  DAMAGE_LOSS // Stock deducted for damaged items
+  THEFT_LOSS // Stock deducted for stolen items
+  TRANSFER_OUT // Stock transferred to another location
+  TRANSFER_IN // Stock received from another location
+  INITIAL_STOCK // Initial stock entry
+  AUDIT_ADJUSTMENT // Stock corrected after physical audit
+}
+
+// NEW: Stock Reservation Model (for pending orders)
+model StockReservation {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @db.Uuid
+  orderId   String   @db.Uuid
+  quantity  Int
+  expiresAt DateTime // Reservation expires after certain time
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([orderId])
+  @@index([expiresAt])
+}
+
+model ShippingOrder {
+  id                     String  @id @default(uuid()) @db.Uuid
+  userId                 String  @db.Uuid
+  shippingOrderId        Int     @unique // Unique Shiprocket order ID
+  shippingShipmentId     Int? // Optional Shiprocket shipment ID
+  orderId                String  @db.Uuid
+  shipmentId             String?
+  status                 String
+  onboardingCompletedNow Int
+  awbCode                String?
+  courierCompanyId       Int?
+  courierName            String?
+  courierRate            Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([shipmentId])
+}
+
+model ShippingInfo {
+  id      String @id @default(uuid()) @db.Uuid
+  storeId String @unique @db.Uuid
+
+  carrier       String?
+  status        String?
+  estimatedDate DateTime?
+  shippedDate   DateTime?
+  deliveredDate DateTime?
+  shippingCost  Float?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+}
+
+model SectionBuilder {
+  id          String  @id @default(uuid()) @db.Uuid
+  storeId     String  @db.Uuid
+  name        String
+  description String?
+  schema      Json // Stores the section schema structure
+  formData    Json // Stores the actual form values/content
+
+  type   String? // Type of section (e.g. hero, features, etc)
+  status String? @default("draft") // draft, published, archived
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  styles    Json? // Custom CSS/styling
+  settings  Json? // Section-specific settings
+  analytics Json? // Usage/performance data
+
+  @@index([storeId])
+  @@index([type])
+}
+
+model RobotsTxt {
+  id        String   @id @default(uuid()) @db.Uuid
+  storeId   String   @db.Uuid
+  content   String   @db.Text // The actual robots.txt content
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+}
+
+model StoreErpNext {
+  id        String   @id @default(uuid()) @db.Uuid
+  storeId   String   @unique @db.Uuid
+  apiKey    String
+  apiSecret String
+  baseUrl   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+}
