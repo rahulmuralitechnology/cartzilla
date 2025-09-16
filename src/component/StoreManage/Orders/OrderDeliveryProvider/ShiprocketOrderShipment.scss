@@ -1,0 +1,68 @@
+.shiprocket-shipment {
+  .shiprocket-header {
+    background: var(--primary-color-two);
+    padding: 16px 24px;
+    margin: -24px -24px 24px;
+
+    h4 {
+      color: white;
+      margin: 0;
+    }
+  }
+
+  .shiprocket-steps {
+    margin-bottom: 24px;
+  }
+
+  .shiprocket-content {
+    padding: 0 24px;
+  }
+
+  .loading-container {
+    text-align: center;
+    padding: 40px 0;
+  }
+
+  .courier-card {
+    margin-bottom: 8px;
+    transition: all 0.3s;
+
+    &.selected {
+      border-color: #1890ff;
+      background: #e6f7ff;
+    }
+
+    .courier-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-left: 8px;
+    }
+
+    .delivery-info {
+      display: block;
+      font-size: 12px;
+    }
+
+    .courier-rate {
+      margin-left: 16px;
+    }
+  }
+
+  .info-card {
+    background: #fafafa;
+  }
+
+  .shipment-details {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .shiprocket-footer {
+    margin: 24px -24px -24px;
+    padding: 16px 24px;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: space-between;
+  }
+}

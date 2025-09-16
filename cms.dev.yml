@@ -1,0 +1,74 @@
+version: "3.9"
+
+networks:
+  bloom:
+    external: true
+
+services:
+  cms:
+    image: registry.bloomi5.com/cms:dev
+    networks: [bloom]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+        constraints:
+          - node.labels.group == core
+      labels:
+        - traefik.enable=true
+        - traefik.swarm.network=bloom
+
+        # Single HTTPS router (TLS-ALPN via leTls)
+        - traefik.http.routers.cmsgw.rule=Host("dev-portal.bloomi5.com")
+        - traefik.http.routers.cmsgw.entrypoints=websecure
+        - traefik.http.routers.cmsgw.tls=true
+        - traefik.http.routers.cmsgw.tls.certresolver=leTls
+
+        # Map to container port
+        - traefik.http.services.cmsgw.loadbalancer.server.port=80
+        - traefik.http.routers.cmsgw.service=cmsgw
+
+
+
+# version: "3.9"
+
+# networks:
+#   bloom:
+#     external: true
+
+# services:
+#   cms:
+#     image: registry.bloomi5.com/cms:dev
+#     # uncomment for manual build 
+#     # env_file: [.env]
+#     networks: [bloom]
+#     deploy:
+#       replicas: 1
+#       restart_policy:
+#         condition: on-failure
+#         delay: 5s
+#         max_attempts: 3
+#       labels:
+#         - traefik.enable=true
+
+#         # HTTP -> HTTPS redirect
+#         - traefik.http.routers.cms-web.rule=Host(`dev-portal.bloomi5.com`)
+#         - traefik.http.routers.cms-web.entrypoints=web
+#         - traefik.http.middlewares.cms-redirect.redirectscheme.scheme=https
+#         - traefik.http.routers.cms-web.middlewares=cms-redirect
+
+#         # HTTPS router
+#         - traefik.http.routers.cms-websecure.rule=Host(`dev-portal.bloomi5.com`)
+#         - traefik.http.routers.cms-websecure.entrypoints=websecure
+#         - traefik.http.routers.cms-websecure.tls=true
+#         - traefik.http.routers.cms-websecure.tls.certresolver=myresolver
+#         - traefik.http.routers.cms-websecure.service=cms-svc
+
+#         # Internal container port your CMS listens on (change if not 80)
+#         - traefik.http.services.cms-svc.loadbalancer.server.port=80
+
+#         # Use bloom overlay for Traefik -> service
+#         - traefik.swarm.network=bloom

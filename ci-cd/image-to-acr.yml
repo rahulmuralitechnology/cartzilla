@@ -1,0 +1,91 @@
+trigger:
+  branches:
+    include:
+      - dev
+
+pr:
+  branches:
+    include:
+      - prod
+
+resources:
+  - repo: self
+
+variables:
+  dockerRegistryServiceConnection: 'f526ed45-3572-4e05-b577-6f57cf009e1d'
+  imageRepository: 'cms'
+  containerRegistry: 'bloomi5main.azurecr.io'
+  dockerfilePath: 'Dockerfile'
+  vmImageName: 'ubuntu-latest'
+
+  devBackendApi: $DEV_VITE_API_BACKEND_API
+  prodBackendApi: $PROD_VITE_API_BACKEND_API
+
+  devviteapienv: $DEV_VITE_API_ENV
+  prodviteapienv: $PROD_VITE_API_ENV
+
+
+
+stages:
+- stage: Build
+  displayName: Build and Push Stage
+  jobs:
+  - job: Build
+    displayName: Build Docker Image
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - script: |
+        echo "checking branch name"
+        echo "$(Build.SourceBranchName)"
+
+        if [[ "$(Build.SourceBranchName)" == "dev" ]]; then
+          echo "##vso[task.setvariable variable=tag]dev"
+          echo "VITE_API_BACKEND_API=${{ variables.devBackendApi }}" > .env
+          echo "VITE_API_ENV=${{ variables.devviteapienv }}" >> .env
+        else
+          echo "##vso[task.setvariable variable=tag]prod"
+          echo "VITE_API_BACKEND_API=${{ variables.prodBackendApi }}" > .env
+          echo "VITE_API_ENV=${{ variables.prodviteapienv }}" >> .env
+        fi
+        echo "----------------------"
+        ls
+        echo "Doing cat .env"
+        cat .env
+        
+      displayName: Set Image Tag
+
+    - task: Docker@2
+      displayName: Build and Push Image to Container Registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+
+- stage: Deploy
+  displayName: Deploy to Azure Web App
+  jobs:
+  - job: Deploy
+    displayName: Deploy Container
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - script: |
+        if [[ "$(Build.SourceBranchName)" == "dev" ]]; then
+          echo "##vso[task.setvariable variable=appName]dev-main-cmss"
+          echo "##vso[task.setvariable variable=tag]dev"
+        else
+          echo "##vso[task.setvariable variable=appName]prod-main-cmss"
+          echo "##vso[task.setvariable variable=tag]prod"
+        fi
+      displayName: Set App Service Name
+
+    - task: AzureWebAppContainer@1
+      displayName: Deploy to Azure App Service
+      inputs:
+        azureSubscription: 'Alazka-Subscription(f464ceab-3b9b-4541-ae75-73123008ffef)'
+        appName: $(appName)
+        containers: '$(containerRegistry)/$(imageRepository):$(tag)'

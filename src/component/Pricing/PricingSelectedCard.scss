@@ -1,0 +1,174 @@
+.subscription-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.subscription-card {
+  width: 100%;
+  // max-width: 480px;
+  border-radius: 16px;
+  border: none;
+  background: white;
+
+  .ant-card-body {
+    padding: 20px 0px;
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+
+  h2 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 24px;
+    font-weight: 600;
+  }
+}
+
+.selection-toggle {
+  display: flex;
+  gap: 8px;
+
+  .ant-btn {
+    border-radius: 8px;
+    height: 32px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+}
+
+.plan-selector {
+  .ant-select {
+    .ant-select-selector {
+      border-radius: 12px;
+      border: 2px solid #f0f0f0;
+      padding: 8px 16px;
+      height: auto;
+      min-height: 48px;
+
+      &:hover {
+        border-color: #1890ff;
+      }
+    }
+  }
+
+  .ant-segmented {
+    border-radius: 12px;
+    padding: 4px;
+    border: 2px solid #f0f0f0;
+    .ant-segmented-item {
+      border-radius: 8px;
+      font-weight: 400;
+    }
+  }
+}
+
+.select-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+
+  .anticon {
+    font-size: 16px;
+    color: #1890ff;
+  }
+}
+
+.plan-card-details {
+  .plan-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 0;
+    padding-top: 30px;
+
+    .plan-card-icon {
+      font-size: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(24, 144, 255, 0.1);
+    }
+
+    .plan-info {
+      .plan-name {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a1a;
+        display: flex;
+        align-items: center;
+      }
+
+      .plan-pricing {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+
+        .amount {
+          font-size: 28px;
+          font-weight: 700;
+          color: #1a1a1a;
+        }
+
+        .duration {
+          font-size: 14px;
+          color: #8c8c8c;
+        }
+      }
+    }
+  }
+
+  .free-trial {
+    text-align: center;
+    margin-bottom: 16px;
+
+    .ant-badge {
+      .ant-badge-count {
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 4px 12px;
+        height: auto;
+        line-height: 1.2;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .subscription-container {
+    padding: 16px;
+  }
+
+  .subscription-card {
+    .ant-card-body {
+      padding: 24px;
+    }
+  }
+
+  .card-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .plan-details .plan-header {
+    flex-direction: column;
+    text-align: left;
+    gap: 12px;
+
+    .plan-info .plan-name {
+      justify-content: center;
+    }
+  }
+}

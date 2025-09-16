@@ -1,0 +1,198 @@
+.main-layout-wrapper {
+  height: 100vh;
+  overflow: hidden;
+  .contact-us-link {
+    margin-right: 5px;
+  }
+
+  .main-sider-wrapper {
+    position: relative;
+    height: 100%;
+    box-shadow: 0 0 0 0 #fff;
+    border-right: 1px solid #eee;
+    background-color: var(--sider-bg);
+
+    .app-logo {
+      width: 100%;
+      padding: 20px 20px 0 20px;
+      margin-bottom: 20px;
+      display: grid;
+      place-items: center;
+      img {
+        width: 180px;
+      }
+    }
+    .sider-memu-container {
+      padding: 0 10px;
+      border: none;
+      background-color: var(--sider-bg);
+      height: 500px;
+      overflow: auto;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+
+      .ant-menu-item {
+        margin-bottom: 8px;
+        font-weight: 400;
+        font-stretch: normal;
+        font-style: normal;
+        letter-spacing: normal;
+
+        display: flex;
+        align-items: center;
+        color: var(--white);
+        &:hover {
+          background-color: var(--purple-800);
+          color: var(--white);
+        }
+        .ant-menu-item-icon {
+          font-size: 1rem;
+        }
+      }
+      .ant-menu-item-active,
+      .ant-menu-item-selected {
+        background-color: var(--purple-800);
+        color: var(--white);
+      }
+      .ant-menu-submenu-open {
+        background-color: var(--purple-700);
+      }
+
+      .ant-menu-submenu,
+      .ant-menu-submenu-title {
+        color: var(--white) !important;
+      }
+    }
+    .user-profile {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      flex-direction: column;
+      margin-bottom: 40px;
+      .avatar-logo {
+        margin-bottom: 20px;
+      }
+      h2 {
+        color: var(--white);
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      p {
+        margin-top: 5px;
+        color: var(--indigo-200);
+      }
+    }
+    .collaps-btn {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      border-left: 0;
+      border-right: 0;
+      font-size: 1rem;
+      border-top: 1px solid var(--purple-400);
+      background-color: var(--purple-800);
+      box-shadow: none;
+      color: var(--white);
+      &:hover {
+        background-color: var(--purple-500);
+        color: var(--white);
+      }
+    }
+
+    .logout-btn {
+      position: absolute;
+      bottom: 100px;
+      border-left: 0;
+      border-right: 0;
+      border: none;
+      height: 35px;
+      background-color: transparent;
+      box-shadow: none;
+      color: var(--white);
+      border: 1px solid #eeeeee45;
+      left: 50%;
+      transform: translate(-50%, 0);
+      &:hover {
+        background-color: var(--purple-800);
+        color: var(--white);
+      }
+    }
+  }
+  .main-header-container {
+    background: #fff;
+    box-shadow: 0 0 0 0 #fff;
+    // overflow: hidden;
+    line-height: normal;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px 0 20px;
+    box-shadow: 0 0 0 2px var(--primary-color);
+    .user_info_card {
+      .anticon .anticon-bell {
+        font-size: 2rem;
+      }
+      height: 100%;
+
+      cursor: pointer;
+      h4,
+      h3 {
+        margin-top: 0;
+        margin-bottom: 2px;
+        text-align: right;
+        font-size: 18px;
+        color: var(--text-primary-color);
+      }
+      h4 {
+        opacity: 0.5;
+        display: none;
+      }
+
+      .credit-info {
+        font-size: 12px;
+        font-weight: 600;
+        text-align: right;
+        color: var(--text-secondary-color);
+      }
+    }
+  }
+
+  .main-content-container {
+    height: calc(100vh - 3.2rem);
+    overflow-y: auto;
+  }
+
+  .store-list-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    height: calc(100vh - 64px);
+    overflow: auto;
+    background-color: var(--bg-light);
+
+    .ant-card-actions {
+      background-color: var(--purple-800);
+      .ant-btn-icon {
+        color: var(--white);
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 430px) {
+  .main-layout-wrapper {
+    .main-header-container {
+      padding: 0 10px 0 10px;
+    }
+    .main-sider-wrapper {
+      .app-logo {
+      }
+    }
+  }
+}

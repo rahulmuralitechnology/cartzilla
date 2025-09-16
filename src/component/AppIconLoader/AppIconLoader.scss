@@ -1,0 +1,31 @@
+.app-icon-loader {
+  width: 50px;
+  height: 50px;
+  padding: 4px;
+  background-color: transparent;
+  border: 10px solid transparent;
+  border-top: 10px solid var(--primary-color);
+  border-right: 10px solid var(--primary-color);
+  border-left: 10px solid #f0f0f0;
+  border-bottom: 10px solid #f0f0f0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  animation: animateAppLoader 2s linear infinite;
+  div {
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    border-radius: 50%;
+    border: 5px solid var(--primary-color);
+  }
+}
+
+@keyframes animateAppLoader {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

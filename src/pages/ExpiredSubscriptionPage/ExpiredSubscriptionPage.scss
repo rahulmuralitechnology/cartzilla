@@ -1,0 +1,76 @@
+.subscription-expired-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 20px;
+
+  .ant-result {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 32px;
+    background-color: #fff;
+    border-radius: 8px;
+    // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .warning-icon {
+    font-size: 72px;
+    color: #faad14;
+  }
+
+  .expired-title {
+    margin-bottom: 24px;
+    color: #cf1322;
+  }
+
+  .expired-content {
+    text-align: center;
+    width: 100%;
+  }
+
+  .expired-message,
+  .renewal-message {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .contact-section {
+    margin: 10px 0;
+    padding: 24px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    width: 100%;
+
+    h4 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  }
+
+  .contact-options {
+    width: 100%;
+
+    .ant-btn {
+      height: 48px;
+      font-size: 16px;
+    }
+  }
+
+  .note-section {
+    margin-top: 16px;
+    font-style: italic;
+  }
+
+  @media (max-width: 576px) {
+    .ant-result {
+      padding: 24px 16px;
+    }
+
+    .expired-title {
+      font-size: 20px;
+    }
+
+    .contact-section {
+      padding: 16px;
+    }
+  }
+}

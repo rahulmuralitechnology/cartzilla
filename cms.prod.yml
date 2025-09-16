@@ -1,0 +1,33 @@
+version: "3.9"
+
+networks:
+  bloom:
+    external: true
+
+services:
+  cms:
+    image: registry.bloomi5.com/cms:prod
+    networks: [bloom]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+        # make sure you've set: docker node update --label-add group=core core-1
+        constraints:
+          - node.labels.group == core
+      labels:
+        - traefik.enable=true
+        # tell Traefik which overlay to hit
+        - traefik.swarm.network=bloom
+
+        # single HTTPS router (Traefik already redirects :80 -> :443)
+        - traefik.http.routers.cms.rule=Host(`portal.bloomi5.com`)
+        - traefik.http.routers.cms.entrypoints=websecure
+        - traefik.http.routers.cms.tls=true
+        - traefik.http.routers.cms.tls.certresolver=leHttp
+
+        # container's internal port (adjust if your image listens elsewhere)
+        - traefik.http.services.cms.loadbalancer.server.port=80
