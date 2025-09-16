@@ -1,0 +1,139 @@
+version: "3.9"
+
+services:
+  api-gateway:
+    container_name: api-gateway
+    build: ./api-gateway
+    environment:
+      PORT: 3000
+      API_PREFIX: /api/v1
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      PRODUCT_SERVICE_URL: http://product-service:3003
+      ORDER_SERVICE_URL: http://order-service:3004
+      STORE_SERVICE_URL: http://store-service:3005
+      CONTENT_SERVICE_URL: http://content-service:3006
+      CONFIG_SERVICE_URL: http://config-service:3007
+      SHIPPING_SERVICE_URL: http://shipping-service:3008
+      ERP_SERVICE_URL: http://erp-service:3009
+      UTILITY_SERVICE_URL: http://utility-service:3010
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    networks:
+      - localnet
+
+  auth-service:
+    container_name: auth-service
+    build: ./auth-service
+    environment:
+      PORT: 3001
+    env_file: .env
+    ports:
+      - "3001:3001"
+    networks:
+      - localnet
+
+  user-service:
+    container_name: user-service
+    build: ./user-service
+    environment:
+      PORT: 3002
+    env_file: .env
+    ports:
+      - "3002:3002"
+    networks:
+      - localnet
+
+  product-service:
+    container_name: product-service
+    build: ./product-service
+    environment:
+      PORT: 3003
+    env_file: .env
+    ports:
+      - "3003:3003"
+    networks:
+      - localnet
+
+  order-service:
+    container_name: order-service
+    build: ./order-service
+    environment:
+      PORT: 3004
+    env_file: .env
+    ports:
+      - "3004:3004"
+    networks:
+      - localnet
+
+  store-service:
+    container_name: store-service
+    build: ./store-service
+    environment:
+      PORT: 3005
+    env_file: .env
+    ports:
+      - "3005:3005"
+    networks:
+      - localnet
+
+  content-service:
+    container_name: content-service
+    build: ./content-service
+    environment:
+      PORT: 3006
+    env_file: .env
+    ports:
+      - "3006:3006"
+    networks:
+      - localnet
+
+  config-service:
+    container_name: config-service
+    build: ./config-service
+    environment:
+      PORT: 3007
+    env_file: .env
+    ports:
+      - "3007:3007"
+    networks:
+      - localnet
+
+  shipping-service:
+    container_name: shipping-service
+    build: ./shipping-service
+    environment:
+      PORT: 3008
+    env_file: .env
+    ports:
+      - "3008:3008"
+    networks:
+      - localnet
+
+  erp-service:
+    container_name: erp-service
+    build: ./erp-service
+    environment:
+      PORT: 3009
+    env_file: .env
+    ports:
+      - "3009:3009"
+    networks:
+      - localnet
+
+  utility-service:
+    container_name: utility-service
+    build: ./utility-service
+    environment:
+      PORT: 3010
+    env_file: .env
+    ports:
+      - "3010:3010"
+    networks:
+      - localnet
+
+networks:
+  localnet:
+    driver: bridge

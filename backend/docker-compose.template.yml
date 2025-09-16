@@ -1,0 +1,168 @@
+version: "3.8"
+
+services:
+  api-gateway:
+    container_name: api-gateway
+    image: ${REGISTRY_NAME}/api-gateway:${IMAGE_TAG}
+    environment:
+      PORT: 3000
+      API_PREFIX: /api/v1
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      PRODUCT_SERVICE_URL: http://product-service:3003
+      ORDER_SERVICE_URL: http://order-service:3004
+      STORE_SERVICE_URL: http://store-service:3005
+      CONTENT_SERVICE_URL: http://content-service:3006
+      CONFIG_SERVICE_URL: http://config-service:3007
+      SHIPPING_SERVICE_URL: http://shipping-service:3008
+      ERP_SERVICE_URL: http://erp-service:3009
+      UTILITY_SERVICE_URL: http://utility-service:3010
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=bloom"
+      - "traefik.http.routers.api-gateway.rule=Host(`${BACKEND_DOMAIN}`)"
+      - "traefik.http.routers.api-gateway.entrypoints=websecure"
+      - "traefik.http.routers.api-gateway.tls.certresolver=myresolver"
+      - "traefik.http.routers.api-gateway.service=api-gateway"
+      - "traefik.http.services.api-gateway.loadbalancer.server.port=3000"
+    expose:
+      - "3000"
+    restart: always
+    networks:
+      - bloom
+
+  auth-service:
+    container_name: auth-service
+    image: ${REGISTRY_NAME}/auth-service:${IMAGE_TAG}
+    environment:
+      PORT: 3001
+    env_file:
+      - .env
+    expose:
+      - "3001"
+    restart: always
+    networks:
+      - bloom
+
+  user-service:
+    container_name: user-service
+    image: ${REGISTRY_NAME}/user-service:${IMAGE_TAG}
+    environment:
+      PORT: 3002
+    env_file:
+      - .env
+    expose:
+      - "3002"
+    restart: always
+    networks:
+      - bloom
+
+  product-service:
+    container_name: product-service
+    image: ${REGISTRY_NAME}/product-service:${IMAGE_TAG}
+    environment:
+      PORT: 3003
+    env_file:
+      - .env
+    expose:
+      - "3003"
+    restart: always
+    networks:
+      - bloom
+
+  order-service:
+    container_name: order-service
+    image: ${REGISTRY_NAME}/order-service:${IMAGE_TAG}
+    environment:
+      PORT: 3004
+    env_file:
+      - .env
+    expose:
+      - "3004"
+    restart: always
+    networks:
+      - bloom
+
+  store-service:
+    container_name: store-service
+    image: ${REGISTRY_NAME}/store-service:${IMAGE_TAG}
+    environment:
+      PORT: 3005
+    env_file:
+      - .env
+    expose:
+      - "3005"
+    restart: always
+    networks:
+      - bloom
+
+  content-service:
+    container_name: content-service
+    image: ${REGISTRY_NAME}/content-service:${IMAGE_TAG}
+    environment:
+      PORT: 3006
+    env_file:
+      - .env
+    expose:
+      - "3006"
+    restart: always
+    networks:
+      - bloom
+
+  config-service:
+    container_name: config-service
+    image: ${REGISTRY_NAME}/config-service:${IMAGE_TAG}
+    environment:
+      PORT: 3007
+    env_file:
+      - .env
+    expose:
+      - "3007"
+    restart: always
+    networks:
+      - bloom
+
+  shipping-service:
+    container_name: shipping-service
+    image: ${REGISTRY_NAME}/shipping-service:${IMAGE_TAG}
+    environment:
+      PORT: 3008
+    env_file:
+      - .env
+    expose:
+      - "3008"
+    restart: always
+    networks:
+      - bloom
+
+  erp-service:
+    container_name: erp-service
+    image: ${REGISTRY_NAME}/erp-service:${IMAGE_TAG}
+    environment:
+      PORT: 3009
+    env_file:
+      - .env
+    expose:
+      - "3009"
+    restart: always
+    networks:
+      - bloom
+
+  utility-service:
+    container_name: utility-service
+    image: ${REGISTRY_NAME}/utility-service:${IMAGE_TAG}
+    environment:
+      PORT: 3010
+    env_file:
+      - .env
+    expose:
+      - "3010"
+    restart: always
+    networks:
+      - bloom
+
+networks:
+  bloom:
+    external: true

@@ -1,0 +1,232 @@
+name: CI/CD - Microservices Backend (prod)
+
+on:
+  push:
+    branches: [ prod ]
+  workflow_dispatch:
+    inputs:
+      bootstrap_full:
+        description: "Build & deploy ALL services (one-time bootstrap)"
+        required: false
+        default: "false"
+      only_services:
+        description: "Space-separated services to build/deploy (optional)"
+        required: false
+        default: ""
+
+concurrency:
+  group: microservices-prod
+  cancel-in-progress: true
+
+env:
+  ALL_SERVICES: "api-gateway auth-service user-service product-service order-service store-service content-service config-service shipping-service erp-service utility-service"
+  IMAGE_TAG: prod
+
+jobs:
+  detect_changes:
+    name: Detect changed services
+    runs-on: bloom
+    environment: prod
+    outputs:
+      services_json: ${{ steps.set.outputs.services_json }}
+      services_space: ${{ steps.set.outputs.services_space }}
+      compose_changed: ${{ steps.set.outputs.compose_changed }}
+    steps:
+      - name: Checkout (full history for merge-aware diff)
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Paths filter
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            api-gateway:
+              - 'api-gateway/**'
+            auth-service:
+              - 'auth-service/**'
+            user-service:
+              - 'user-service/**'
+            product-service:
+              - 'product-service/**'
+            order-service:
+              - 'order-service/**'
+            store-service:
+              - 'store-service/**'
+            content-service:
+              - 'content-service/**'
+            config-service:
+              - 'config-service/**'
+            shipping-service:
+              - 'shipping-service/**'
+            erp-service:
+              - 'erp-service/**'
+            utility-service:
+              - 'utility-service/**'
+            compose:
+              - 'docker-compose.template.yml'
+
+      - name: Build matrix + outputs (with merge-safe fallback)
+        id: set
+        shell: bash
+        run: |
+          changed=()
+
+          # 1) Manual bootstrap
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.bootstrap_full }}" == "true" ]]; then
+            read -r -a changed <<< "${{ env.ALL_SERVICES }}"
+          # 2) Manual selection
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.only_services }}" ]]; then
+            allowed="${{ env.ALL_SERVICES }}"
+            for svc in ${{ inputs.only_services }}; do
+              echo "$allowed" | grep -qw "$svc" && changed+=("$svc")
+            done
+          else
+            # 3) Normal push: from paths-filter
+            [[ "${{ steps.changes.outputs.api-gateway }}"      == "true" ]] && changed+=("api-gateway")
+            [[ "${{ steps.changes.outputs.auth-service }}"     == "true" ]] && changed+=("auth-service")
+            [[ "${{ steps.changes.outputs.user-service }}"     == "true" ]] && changed+=("user-service")
+            [[ "${{ steps.changes.outputs.product-service }}"  == "true" ]] && changed+=("product-service")
+            [[ "${{ steps.changes.outputs.order-service }}"    == "true" ]] && changed+=("order-service")
+            [[ "${{ steps.changes.outputs.store-service }}"    == "true" ]] && changed+=("store-service")
+            [[ "${{ steps.changes.outputs.content-service }}"  == "true" ]] && changed+=("content-service")
+            [[ "${{ steps.changes.outputs.config-service }}"   == "true" ]] && changed+=("config-service")
+            [[ "${{ steps.changes.outputs.shipping-service }}" == "true" ]] && changed+=("shipping-service")
+            [[ "${{ steps.changes.outputs.erp-service }}"      == "true" ]] && changed+=("erp-service")
+            [[ "${{ steps.changes.outputs.utility-service }}"  == "true" ]] && changed+=("utility-service")
+
+            # 3b) Fallback for merge commits when paths-filter finds nothing:
+            if [[ ${#changed[@]} -eq 0 && "${{ github.event_name }}" == "push" ]]; then
+              BASE="${{ github.event.before }}"
+              HEAD="${{ github.sha }}"
+              # fallback base if event.before is empty (rare)
+              if [[ -z "$BASE" || "$BASE" == "0000000000000000000000000000000000000000" ]]; then
+                BASE="$(git rev-parse HEAD^ 2>/dev/null || true)"
+              fi
+
+              if [[ -n "$BASE" ]]; then
+                mapfile -t files < <(git diff --name-only "$BASE" "$HEAD" || true)
+                declare -A seen=()
+                for f in "${files[@]}"; do
+                  top="${f%%/*}"
+                  case "$top" in
+                    api-gateway|auth-service|user-service|product-service|order-service|store-service|content-service|config-service|shipping-service|erp-service|utility-service)
+                      seen["$top"]=1
+                      ;;
+                  esac
+                done
+                for s in api-gateway auth-service user-service product-service order-service store-service content-service config-service shipping-service erp-service utility-service; do
+                  [[ -n "${seen[$s]}" ]] && changed+=("$s")
+                done
+              fi
+            fi
+          fi
+
+          if [[ ${#changed[@]} -eq 0 ]]; then
+            json='[]'
+            space=''
+          else
+            json='['
+            for s in "${changed[@]}"; do json="${json}\"$s\","; done
+            json="${json%,}"
+            json="${json}]"
+            space="${changed[*]}"
+          fi
+
+          echo "services_json=$json"   >> "$GITHUB_OUTPUT"
+          echo "services_space=$space" >> "$GITHUB_OUTPUT"
+          echo "compose_changed=${{ steps.changes.outputs.compose }}" >> "$GITHUB_OUTPUT"
+
+  build_and_push:
+    name: Build & push (${{ matrix.service }}) → prod
+    needs: detect_changes
+    if: ${{ needs.detect_changes.outputs.services_json != '[]' }}
+    runs-on: bloom
+    environment: prod
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        service: ${{ fromJSON(needs.detect_changes.outputs.services_json) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Log in to Registry
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Build image
+        run: |
+          docker build \
+            -t ${{ secrets.REGISTRY_NAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }} \
+            -f ${{ matrix.service }}/Dockerfile ${{ matrix.service }}
+
+      - name: Push image
+        run: docker push ${{ secrets.REGISTRY_NAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+
+      - name: Cleanup
+        run: docker rmi -f ${{ secrets.REGISTRY_NAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }} || true
+
+  deploy:
+    name: Deploy -> prod
+    needs: [detect_changes, build_and_push]
+    if: ${{ needs.detect_changes.outputs.services_space != '' || needs.detect_changes.outputs.compose_changed == 'true' }}
+    runs-on: bloom
+    environment: prod
+    env:
+      CHANGED_SERVICES: ${{ needs.detect_changes.outputs.services_space }}
+      COMPOSE_CHANGED: ${{ needs.detect_changes.outputs.compose_changed }}
+    steps:
+      - name: Checkout (for template)
+        uses: actions/checkout@v3
+
+      - name: Generate docker-compose.yml from template
+        run: |
+          cat docker-compose.template.yml | \
+          BACKEND_DOMAIN=${{ secrets.BACKEND_DOMAIN }} \
+          REGISTRY_NAME=${{ secrets.REGISTRY_NAME }} \
+          IMAGE_TAG=${{ env.IMAGE_TAG }} \
+          envsubst > docker-compose.yml
+
+      - name: Upload docker-compose.yml to VM (repo root)
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.PROD_VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "/${{ secrets.VM_USER }}/bloom/bloomi5_ecom_backend_microservices"
+
+      - name: Deploy on remote VM (service-by-service refresh)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            set -e
+
+            COMPOSE="docker-compose"
+            BASE="/${{ secrets.VM_USER }}/bloom/bloomi5_ecom_backend_microservices"
+            cd "$BASE"
+
+            # login to registry
+            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+            if [ -n "${{ env.CHANGED_SERVICES }}" ]; then
+              for SVC in ${{ env.CHANGED_SERVICES }}; do
+                echo "==== Refreshing $SVC ===="
+                $COMPOSE stop "$SVC" || true
+                $COMPOSE rm -f "$SVC" || true
+
+                docker image rm -f ${{ secrets.REGISTRY_NAME }}/$SVC:${{ env.IMAGE_TAG }} || true
+                $COMPOSE pull "$SVC" || docker pull ${{ secrets.REGISTRY_NAME }}/$SVC:${{ env.IMAGE_TAG }} || true
+
+                $COMPOSE up -d "$SVC"
+              done
+            elif [ "${{ env.COMPOSE_CHANGED }}" = "true" ]; then
+              $COMPOSE up -d
+            else
+              echo "Nothing to deploy."
+            fi
