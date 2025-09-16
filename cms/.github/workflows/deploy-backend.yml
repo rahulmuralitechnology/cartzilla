@@ -1,0 +1,144 @@
+# name: CI/CD - CMS Portal
+
+# on:
+#   push:
+#     branches: [ dev ]
+#     tags:
+#       - 'v*'
+
+# jobs:
+#   deploy-dev:
+#     if: github.ref_name == 'dev'
+#     runs-on: bloom
+#     environment: dev
+
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
+
+#       - name: Build Docker Image
+#         run: |
+#           docker build \
+#             -t ${{ secrets.REGISTRY_NAME }}/cms:dev \
+#             --build-arg VITE_API_BACKEND_API=${{ secrets.VITE_API_BACKEND_API }} \
+#             --build-arg VITE_API_ENV=dev \
+#             -f Dockerfile .
+
+#       - name: Log in to Registry
+#         run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+#       - name: Push Docker Image
+#         run: |
+#           docker push ${{ secrets.REGISTRY_NAME }}/cms:dev
+#           docker rmi -f ${{ secrets.REGISTRY_NAME }}/cms:dev
+
+#       - name: SSH Stop and Cleanup
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.DEV_VM_HOST }}
+#           username: ${{ secrets.VM_USER }}
+#           key: ${{ secrets.VM_SSH_KEY }}
+#           script: |
+#             cd /${{ secrets.VM_USER }}/e-commerce-cms || mkdir -p e-commerce-cms
+#             if [ -f docker-compose.yml ]; then
+#               docker-compose down
+#               rm -f docker-compose.yml
+#               docker rmi -f ${{ secrets.REGISTRY_NAME }}/cms:dev || true
+#             fi
+#             echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+#             docker pull ${{ secrets.REGISTRY_NAME }}/cms:dev
+
+#       - name: Generate docker-compose.yml from template
+#         run: |
+#           cat docker-compose.template.yml | CMS_DOMAIN=${{ secrets.CMS_DOMAIN }} REGISTRY_NAME=${{ secrets.REGISTRY_NAME }} IMAGE_TAG=dev envsubst > docker-compose.yml
+
+#       - name: Upload docker-compose.yml
+#         uses: appleboy/scp-action@v0.1.4
+#         with:
+#           host: ${{ secrets.DEV_VM_HOST }}
+#           username: ${{ secrets.VM_USER }}
+#           key: ${{ secrets.VM_SSH_KEY }}
+#           source: "docker-compose.yml"
+#           target: "/${{ secrets.VM_USER }}/e-commerce-cms"
+
+#       - name: Start Container on Dev
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.DEV_VM_HOST }}
+#           username: ${{ secrets.VM_USER }}
+#           key: ${{ secrets.VM_SSH_KEY }}
+#           script: |
+#             cd /${{ secrets.VM_USER }}/e-commerce-cms
+#             docker-compose up -d
+
+
+#   deploy-prod:
+#     if: startsWith(github.ref, 'refs/tags/v')
+#     runs-on: bloom
+#     environment: prod
+
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
+
+#       - name: Build Docker Image
+#         run: |
+#           docker build \
+#             -t ${{ secrets.REGISTRY_NAME }}/cms:prod \
+#             --build-arg VITE_API_BACKEND_API=${{ secrets.VITE_API_BACKEND_API }} \
+#             --build-arg VITE_API_ENV=prod \
+#             -f Dockerfile .
+
+#       - name: Log in to Registry
+#         run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+#       - name: Push Docker Image
+#         run: |
+#           docker push ${{ secrets.REGISTRY_NAME }}/cms:prod
+#           docker rmi -f ${{ secrets.REGISTRY_NAME }}/cms:prod
+
+#       - name: SSH Stop and Cleanup
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.PROD_VM_HOST }}
+#           username: ${{ secrets.VM_USER }}
+#           key: ${{ secrets.VM_SSH_KEY }}
+#           script: |
+#             cd /${{ secrets.VM_USER }}/e-commerce-cms || mkdir -p e-commerce-cms
+#             if [ -f docker-compose.yml ]; then
+#               docker-compose down
+#               rm -f docker-compose.yml
+#               docker rmi -f ${{ secrets.REGISTRY_NAME }}/cms:prod || true
+#             fi
+#             echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+#             docker pull ${{ secrets.REGISTRY_NAME }}/cms:prod
+
+#       - name: Generate docker-compose.yml from template
+#         run: |
+#           cat docker-compose.template.yml | CMS_DOMAIN=${{ secrets.CMS_DOMAIN }} REGISTRY_NAME=${{ secrets.REGISTRY_NAME }} IMAGE_TAG=prod envsubst > docker-compose.yml
+
+#       - name: Upload docker-compose.yml
+#         uses: appleboy/scp-action@v0.1.4
+#         with:
+#           host: ${{ secrets.PROD_VM_HOST }}
+#           username: ${{ secrets.VM_USER }}
+#           key: ${{ secrets.VM_SSH_KEY }}
+#           source: "docker-compose.yml"
+#           target: "/${{ secrets.VM_USER }}/e-commerce-cms"
+
+#       - name: Start Container on Prod
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.PROD_VM_HOST }}
+#           username: ${{ secrets.VM_USER }}
+#           key: ${{ secrets.VM_SSH_KEY }}
+#           script: |
+#             cd /${{ secrets.VM_USER }}/e-commerce-cms
+#             docker-compose up -d
+
+
+
+
+
+
+

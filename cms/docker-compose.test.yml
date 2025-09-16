@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  cms:
+    container_name: cms
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args: # ← build-time for Vite
+        VITE_API_BACKEND_API: ${VITE_API_BACKEND_API}
+        VITE_API_ENV: ${VITE_API_ENV}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cms-router.rule=Host(`${CMS_DOMAIN}`)"
+      - "traefik.http.routers.cms-router.entrypoints=websecure"
+      - "traefik.http.routers.cms-router.tls.certresolver=myresolver"
+      - "traefik.http.services.cms-service.loadbalancer.server.port=80"
+    restart: always
+    networks:
+      - bloom
+
+networks:
+  bloom:
+    external: true

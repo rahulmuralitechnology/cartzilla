@@ -1,0 +1,100 @@
+name: CI/CD - CMS (dev)
+
+on:
+  push:
+    branches: [ dev ]
+
+concurrency:
+  group: cms-dev
+  cancel-in-progress: true
+
+env:
+  IMAGE_TAG: dev
+  STACK_NAME: cms
+
+jobs:
+  build_and_push:
+    runs-on: bloom
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker login
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+      - name: Build image (:dev)
+        run: |
+          docker build \
+            -t ${{ secrets.REGISTRY_NAME }}/cms:${{ env.IMAGE_TAG }} \
+            --build-arg VITE_API_BACKEND_API=${{ secrets.VITE_API_BACKEND_API }} \
+            --build-arg VITE_API_ENV=dev \
+            -f Dockerfile .
+
+      - name: Push image (:dev)
+        run: |
+          docker push ${{ secrets.REGISTRY_NAME }}/cms:${{ env.IMAGE_TAG }}
+          docker rmi -f ${{ secrets.REGISTRY_NAME }}/cms:${{ env.IMAGE_TAG }} || true
+
+  deploy:
+    needs: build_and_push
+    runs-on: bloom
+    environment: dev
+    steps:
+      - name: Checkout (for stack file)
+        uses: actions/checkout@v4
+
+      - name: Prepare stack artifact
+        id: prep
+        shell: bash
+        run: |
+          set -e
+          if [[ ! -f cms.dev.yml ]]; then
+            echo "cms.dev.yml not found at repo root"; exit 1
+          fi
+          # If you later add templating, render here. For now just copy:
+          cp cms.dev.yml cms.rendered.yml
+
+      - name: Upload cms.rendered.yml
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DEV_VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "cms.rendered.yml"
+          target: "/${{ secrets.VM_USER }}/e-commerce-cms"
+
+      - name: Swarm deploy on DEV
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEV_VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          envs: STACK_NAME,IMAGE_TAG
+          script: |
+            set -euo pipefail
+            : "${STACK_NAME:=cms}"
+            : "${IMAGE_TAG:=dev}"
+
+            BASE="/${{ secrets.VM_USER }}/e-commerce-cms"
+            cd "$BASE"
+
+            # Canonicalize filename on server
+            mv -f cms.rendered.yml cms.yml
+
+            # Login so nodes can pull private image
+            echo "${{ secrets.REGISTRY_PASSWORD }}" \
+              | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+            # Reconcile stack spec (idempotent)
+            docker stack deploy -c cms.yml "$STACK_NAME" --with-registry-auth
+
+            # Force a rolling update to pull the latest :dev digest
+            docker service update \
+              --with-registry-auth \
+              --image ${{ secrets.REGISTRY_NAME }}/cms:$IMAGE_TAG \
+              --force \
+              ${STACK_NAME}_cms
+
+            # Quick status
+            docker stack services "$STACK_NAME"

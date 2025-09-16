@@ -1,0 +1,75 @@
+.main-content-container {
+  background-color: #fff;
+}
+.started-layout-wrapper {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  .contact-us-link {
+    margin-right: 5px;
+  }
+
+  .ellipse-1,
+  .ellipse-2 {
+    position: absolute;
+    z-index: 1;
+  }
+  .ellipse-1 {
+    transform: translateY(-165px);
+  }
+  .ellipse-2 {
+    margin-bottom: 0;
+    transform: translateY(250px);
+  }
+
+  .main-header-container {
+    background: #fff;
+    box-shadow: 0 0 0 0 #fff;
+    line-height: normal;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+    padding: 0 150px;
+    .user_info_card {
+      height: 100%;
+      cursor: pointer;
+      h4,
+      h3 {
+        margin-top: 0;
+        margin-bottom: 2px;
+        text-align: right;
+        font-size: 14px;
+        color: var(--primary-color-two);
+      }
+      h4 {
+        opacity: 0.5;
+        display: none;
+      }
+
+      .credit-info {
+        font-size: 12px;
+        font-weight: 600;
+        text-align: right;
+        color: var(--text-secondary-color);
+      }
+    }
+  }
+
+  .main-content-container {
+    height: calc(100vh - 3.2rem);
+    overflow-y: auto;
+  }
+}
+
+@media screen and (max-width: 430px) {
+  .started-layout-wrapper {
+    .main-header-container {
+      padding: 0 10px 0 10px;
+    }
+    .main-sider-wrapper {
+      .app-logo {
+      }
+    }
+  }
+}

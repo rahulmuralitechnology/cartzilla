@@ -1,0 +1,12 @@
+.custom-modal-wrapper {
+  border-radius: 8px;
+  .ant-modal-content {
+    border-radius: 20px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .ant-modal-header {
+    margin-bottom: 0;
+  }
+}

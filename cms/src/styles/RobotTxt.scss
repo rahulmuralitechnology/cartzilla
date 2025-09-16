@@ -1,0 +1,422 @@
+// RobotsTxtManager.scss
+.robots-txt-manager {
+  padding: 24px;
+  background: #fff;
+
+  // Header Card Styles
+  .robots-header-card {
+    margin-bottom: 24px;
+    border: 1px solid #e8e8e8;
+
+    .robots-title {
+      margin-bottom: 8px !important;
+      color: #1f1f1f;
+      font-weight: 600;
+    }
+
+    .robots-add-btn {
+      height: 40px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+  }
+
+  // Content Card Styles
+  .robots-content-card {
+    // border-radius: 12px;
+    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8e8e8;
+    overflow: hidden;
+
+    .ant-card-body {
+      padding: 0;
+    }
+  }
+
+  // Table Styles
+  .robots-table {
+    .ant-table-thead > tr > th {
+      background: #fafafa;
+      font-weight: 600;
+      color: #1f1f1f;
+      border-bottom: 2px solid #e8e8e8;
+      padding: 16px;
+    }
+
+    .ant-table-tbody > tr > td {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background: #f8f9ff;
+      transition: background 0.3s ease;
+    }
+
+    // Store column styles
+    .robots-domain {
+      font-size: 12px;
+      color: #666;
+      font-family: "Monaco", "Menlo", monospace;
+    }
+
+    // Content preview styles
+    .robots-content-preview {
+      max-width: 300px;
+
+      .robots-preview-text {
+        background: #f6f8fa;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #e1e8ed;
+        font-size: 12px;
+        line-height: 1.4;
+        word-break: break-all;
+        white-space: pre-wrap;
+      }
+    }
+
+    // Action buttons
+    .robots-action-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+      }
+
+      &.robots-preview-btn:hover {
+        background: #e6f7ff;
+        color: #1890ff;
+      }
+
+      &.robots-edit-btn:hover {
+        background: #f6ffed;
+        color: #52c41a;
+      }
+
+      &.robots-copy-btn:hover {
+        background: #fff7e6;
+        color: #fa8c16;
+      }
+
+      &.robots-download-btn:hover {
+        background: #f9f0ff;
+        color: #722ed1;
+      }
+
+      &.robots-delete-btn:hover {
+        background: #fff2f0;
+        color: #ff4d4f;
+      }
+    }
+  }
+
+  // Modal Styles
+  .robots-modal {
+    .ant-modal-header {
+      border-radius: 12px 12px 0 0;
+      padding: 24px 24px 16px;
+
+      .ant-modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f1f1f;
+      }
+    }
+
+    .ant-modal-body {
+      padding: 24px;
+    }
+
+    // Info alert styles
+    .robots-info-alert {
+      margin-bottom: 24px;
+      border-radius: 8px;
+      border: 1px solid #d9f7be;
+      background: #f6ffed;
+
+      .ant-alert-icon {
+        color: #52c41a;
+      }
+    }
+
+    // Template buttons
+    .robots-templates {
+      margin-bottom: 24px;
+
+      .robots-template-btn {
+        height: 40px;
+        border-radius: 8px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        border: 2px dashed #d9d9d9;
+
+        &:hover {
+          border-color: #1890ff;
+          color: #1890ff;
+          background: #f0f8ff;
+          transform: translateY(-1px);
+          transition: all 0.3s ease;
+        }
+      }
+    }
+
+    // Textarea styles
+    .robots-textarea {
+      font-family: "Monaco", "Menlo", "Consolas", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      border-radius: 8px;
+      border: 2px solid #e8e8e8;
+
+      &:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+      }
+
+      &::placeholder {
+        color: #bfbfbf;
+        font-style: italic;
+      }
+    }
+
+    // Status switch
+    .robots-status-switch {
+      &.ant-switch-checked {
+        background-color: #52c41a;
+      }
+    }
+
+    // Modal actions
+    .robots-modal-actions {
+      margin-top: 32px;
+      margin-bottom: 0;
+      text-align: right;
+
+      .robots-save-btn {
+        border-radius: 8px;
+        height: 40px;
+        font-weight: 500;
+        min-width: 120px;
+      }
+    }
+  }
+
+  // Preview Modal Styles
+  .robots-preview-modal {
+    .ant-modal-header {
+      border-radius: 12px 12px 0 0;
+    }
+
+    .robots-preview-content {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+
+      pre {
+        margin: 0;
+        font-family: "Monaco", "Menlo", "Consolas", monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #333;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    }
+
+    .ant-modal-footer {
+      border-top: 1px solid #f0f0f0;
+      padding: 16px 24px;
+
+      .ant-btn {
+        border-radius: 6px;
+        height: 36px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Status tags
+  .ant-tag {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border: none;
+
+    &.ant-tag-success {
+      background: #f6ffed;
+      color: #389e0d;
+    }
+  }
+
+  // Responsive Design
+  @media (max-width: 768px) {
+    padding: 16px;
+
+    .robots-header-card {
+      .ant-row {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .robots-add-btn {
+        width: 100%;
+      }
+    }
+
+    .robots-table {
+      .ant-table-thead > tr > th,
+      .ant-table-tbody > tr > td {
+        padding: 12px 8px;
+      }
+
+      .robots-content-preview {
+        max-width: 200px;
+      }
+
+      .robots-action-btn {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    .robots-modal {
+      .robots-templates {
+        .ant-col {
+          margin-bottom: 16px;
+        }
+      }
+    }
+  }
+
+  // Animation keyframes
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // Loading states
+  .robots-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+
+    .ant-spin {
+      font-size: 24px;
+    }
+  }
+
+  // Empty state
+  .robots-empty {
+    text-align: center;
+    padding: 48px 24px;
+
+    .ant-empty-description {
+      color: #8c8c8c;
+      font-size: 14px;
+    }
+  }
+
+  // Validation styles
+  .ant-form-item-has-error {
+    .robots-textarea {
+      border-color: #ff4d4f;
+
+      &:focus {
+        border-color: #ff4d4f;
+        box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
+      }
+    }
+  }
+
+  .ant-form-item-has-warning {
+    .robots-textarea {
+      border-color: #faad14;
+
+      &:focus {
+        border-color: #faad14;
+        box-shadow: 0 0 0 2px rgba(250, 173, 20, 0.1);
+      }
+    }
+  }
+
+  // Dark mode support (if needed)
+  &.dark-mode {
+    background: #141414;
+
+    .robots-header-card,
+    .robots-content-card {
+      background: #1f1f1f;
+      border-color: #303030;
+    }
+
+    .robots-title {
+      color: #fff;
+    }
+
+    .robots-textarea {
+      background: #262626;
+      border-color: #434343;
+      color: #fff;
+
+      &::placeholder {
+        color: #8c8c8c;
+      }
+    }
+
+    .robots-preview-content {
+      background: #262626;
+      border-color: #434343;
+
+      pre {
+        color: #fff;
+      }
+    }
+  }
+}
+
+// Global overrides for robots.txt components
+.ant-modal.robots-modal {
+  .ant-modal-wrap {
+    padding: 32px;
+  }
+}
+
+.ant-table-wrapper.robots-table {
+  .ant-table-container {
+    border-radius: 0 0 12px 12px;
+  }
+}
+
+// Print styles
+@media print {
+  .robots-txt-manager {
+    .robots-header-card .robots-add-btn,
+    .robots-action-btn,
+    .ant-pagination {
+      display: none !important;
+    }
+
+    .robots-table {
+      .ant-table-tbody > tr:nth-child(even) {
+        background: #f9f9f9 !important;
+      }
+    }
+  }
+}

@@ -1,0 +1,178 @@
+.pricing-section {
+  position: relative;
+  padding: 20px 0 0 0;
+  overflow: hidden;
+  background: linear-gradient(to bottom, white, white, #e9d5ff);
+  min-height: calc(100vh - 3.2rem);
+  overflow: hidden;
+
+  .pricing-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  .pricing-header {
+    text-align: center;
+    max-width: 768px;
+    margin: 0 auto 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    .ant-typography {
+      margin-bottom: 15px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(to bottom left, #a78bfa, #4c1d95);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .billing-toggle {
+      width: 300px;
+      .ant-btn {
+        padding: 8px 24px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s;
+
+        &.ant-btn-primary {
+          background: linear-gradient(to bottom right, #a78bfa, #4c1d95);
+          border: none;
+        }
+      }
+    }
+  }
+
+  .pricing-cards {
+    position: relative;
+    background-color: #fff;
+    padding: 1.2rem 1rem;
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    .ant-card-head-title {
+      font-size: 1.3rem;
+    }
+
+    .pricing-card {
+      height: 100%;
+      transition: all 0.3s;
+      box-shadow: none;
+
+      // &:hover {
+      //   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      // }
+    }
+
+    .ant-btn-primary {
+      background: linear-gradient(to bottom right, #a78bfa, #4c1d95);
+      border: none;
+      height: 48px;
+      font-weight: 500;
+      &:hover {
+        background-color: #4c1d95;
+      }
+    }
+  }
+
+  .normal {
+    .price {
+      .amount {
+        font-size: 36px;
+        font-weight: bold;
+      }
+
+      .period {
+        font-size: 16px;
+        color: #6b7280;
+      }
+    }
+
+    .description {
+      margin-top: 16px;
+      font-size: 16px;
+      color: #6b7280;
+    }
+
+    .features {
+      margin: 15px 0;
+
+      .feature {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: #6b7280;
+
+        .anticon {
+          margin-right: 12px;
+          color: #8b5cf6;
+        }
+      }
+    }
+  }
+
+  .recommended {
+    background: linear-gradient(to bottom right, #a78bfa, #4c1d95);
+    color: white !important;
+
+    .ant-card-head-title {
+      color: white !important;
+    }
+
+    .price {
+      .amount {
+        font-size: 36px;
+        font-weight: bold;
+      }
+
+      .period {
+        font-size: 16px;
+        color: #fff;
+      }
+    }
+
+    .description {
+      margin-top: 16px;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .features {
+      margin: 25px 0;
+
+      .feature {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: #fff;
+
+        .anticon {
+          margin-right: 12px;
+          color: #fff;
+        }
+      }
+    }
+
+    .popular-tag {
+      background-color: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      color: white;
+      padding: 4px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .ant-btn-primary {
+      background-color: white;
+      color: #ffff;
+
+      &:hover {
+        background-color: #a78bfa;
+      }
+    }
+  }
+}

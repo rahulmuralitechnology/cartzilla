@@ -1,0 +1,113 @@
+.preview-container {
+  width: 100%;
+  margin: 0 auto;
+
+  .preview-content {
+    text-align: center;
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      font-weight: 400;
+
+      .highlight {
+        background: linear-gradient(to right, var(--text-bg-primary), var(--text-bg-secondary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-block;
+      }
+    }
+
+    .preview-frame {
+      margin: 1rem auto;
+      max-width: 1200px;
+      height: 450px;
+
+      .browser-frame {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+
+        .browser-header {
+          background: #f5f5f5;
+          padding: 0.8rem;
+          border-bottom: 1px solid #e0e0e0;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+
+          .browser-actions {
+            display: flex;
+            gap: 6px;
+
+            .browser-dot {
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              background: #ff5f57;
+
+              &:nth-child(2) {
+                background: #ffbd2e;
+              }
+
+              &:nth-child(3) {
+                background: #28c940;
+              }
+            }
+          }
+
+          .browser-address-bar {
+            flex: 1;
+            background: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: left;
+
+            span {
+              color: #999;
+            }
+          }
+        }
+
+        .browser-content {
+          height: 380px;
+          background: #fff;
+
+          .preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+          }
+        }
+      }
+    }
+
+    .action-section {
+      margin-top: 2rem;
+
+      .deploy-button {
+        height: 48px;
+        padding: 0 2rem;
+        border: none;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .preview-container {
+    padding: 1rem;
+
+    .preview-frame {
+      .browser-frame {
+        .browser-content {
+          height: 400px;
+        }
+      }
+    }
+  }
+}

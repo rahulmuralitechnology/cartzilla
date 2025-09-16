@@ -1,0 +1,150 @@
+.dashboard-container {
+}
+
+.dashboard-card {
+  height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  color: #6c7a89;
+  margin-bottom: 24px;
+}
+
+.donut-chart-container {
+  height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.line-chart-container {
+  height: 250px;
+}
+
+.target-legend,
+.user-hit-legend {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 0 16px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.legend-dot.weekly {
+  background-color: #4ecdc4;
+}
+
+.legend-dot.monthly {
+  background-color: #6c7a89;
+}
+
+.legend-dot.monthly-visitors {
+  background-color: #4ecdc4;
+}
+
+.legend-text {
+  color: #6c7a89;
+  margin-right: 8px;
+}
+
+.legend-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.metric-card {
+  height: 200px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.metric-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  display: block;
+}
+
+.metric-subtitle {
+  font-size: 12px;
+  color: #6c7a89;
+  display: block;
+}
+
+.metric-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.metric-icon.revenue-icon {
+  background-color: #fff8e1;
+}
+
+.metric-icon.order-icon {
+  background-color: #e8f5e9;
+}
+
+.metric-icon.customers-icon {
+  background-color: #e3f2fd;
+}
+
+.metric-icon.delivery-icon {
+  background-color: #fbe9e7;
+}
+
+.metric-icon span {
+  font-size: 20px;
+}
+
+.metric-value {
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.metric-comparison {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.metric-comparison.positive {
+  color: #4ecdc4;
+}
+
+.metric-comparison.negative {
+  color: #ff6b6b;
+}
+
+.details-button {
+  padding: 0;
+  font-size: 12px;
+  color: #6c7a89;
+}
+
+.details-button:hover {
+  color: #4ecdc4;
+}

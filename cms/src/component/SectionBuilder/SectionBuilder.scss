@@ -1,0 +1,217 @@
+// .header {
+//   text-align: center;
+//   margin-bottom: 32px;
+//   padding: 24px 0;
+// }
+
+.header h1 {
+  color: var(--text-color);
+  margin-bottom: 8px !important;
+}
+
+.upload-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+}
+
+.upload-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.schema-uploader {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.schema-uploader:hover {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+}
+
+.schema-uploader .ant-upload-drag-icon {
+  color: var(--primary-color);
+  margin-top: 0;
+  font-size: 48px;
+}
+
+.error-message {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+}
+
+.form-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.form-card .ant-card-head {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-bottom: none;
+}
+
+.form-card .ant-card-head-title {
+  color: white;
+}
+
+.form-card .ant-card-extra button {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.form-card .ant-card-extra button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+.form-description {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.dynamic-form {
+  padding: 8px 0;
+}
+
+.dynamic-form .ant-form-item {
+  margin-bottom: 24px;
+}
+
+.dynamic-form .ant-form-item-label > label {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.dynamic-form .ant-input,
+.dynamic-form .ant-input-number,
+.dynamic-form .ant-select-selector {
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.dynamic-form .ant-input:focus,
+.dynamic-form .ant-input-number:focus,
+.dynamic-form .ant-select-focused .ant-select-selector {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.form-actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.form-actions .ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.form-actions .ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.form-actions .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+.saved-data-preview {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+.json-preview {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  padding: 16px;
+  border-radius: 6px;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    margin-bottom: 24px;
+    padding: 16px 0;
+  }
+
+  .form-actions {
+    text-align: center;
+  }
+
+  .form-actions .ant-space {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .form-actions .ant-btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .schema-uploader .ant-upload-drag-icon {
+    font-size: 36px;
+  }
+
+  .dynamic-form .ant-col {
+    margin-bottom: 0;
+  }
+
+  .json-preview {
+    font-size: 11px;
+    padding: 12px;
+  }
+}
+
+/* Loading States */
+.ant-spin-spinning {
+  opacity: 0.7;
+}
+
+/* Custom Ant Design Overrides */
+.ant-message {
+  z-index: 9999;
+}
+
+.ant-form-item-explain-error {
+  color: var(--error-color);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.ant-form-item-has-error .ant-input,
+.ant-form-item-has-error .ant-input-number,
+.ant-form-item-has-error .ant-select-selector {
+  border-color: var(--error-color);
+}
+
+.ant-form-item-has-error .ant-input:focus,
+.ant-form-item-has-error .ant-input-number:focus,
+.ant-form-item-has-error .ant-select-focused .ant-select-selector {
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}

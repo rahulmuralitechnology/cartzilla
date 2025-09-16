@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  cms:
+    container_name: cms
+    image: ${REGISTRY_NAME}/cms:${IMAGE_TAG}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cms-router.rule=Host(`${CMS_DOMAIN}`)"
+      - "traefik.http.routers.cms-router.entrypoints=websecure"
+      - "traefik.http.routers.cms-router.tls.certresolver=myresolver"
+      - "traefik.http.services.cms-service.loadbalancer.server.port=80"
+    restart: always
+    networks:
+      - bloom
+
+networks:
+  bloom:
+    external: true
+
+  # traefik:
+  #   image: traefik:v2.10
+  #   container_name: traefik
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   env_file:
+  #     - .env
+  #   command:
+  #     - "--entrypoints.web.address=:80"
+  #     - "--entrypoints.websecure.address=:443"
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+  #     - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+  #     - "--certificatesresolvers.myresolver.acme.email=${TRAEFIK_EMAIL}"
+  #     - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  #   volumes:
+  #     - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  #     - "./letsencrypt:/letsencrypt"

@@ -1,0 +1,136 @@
+.store-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .store-details-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+
+    .form-section {
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        margin-top: 0;
+        font-weight: 400;
+
+        .highlight {
+          background: linear-gradient(to right, var(--text-bg-primary), var(--text-bg-secondary));
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          display: inline-block;
+        }
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 1rem;
+        margin-top: 0;
+        font-size: 1.1rem;
+      }
+
+      .store-form {
+        background: #eee6fe;
+        padding: 15px 20px;
+        .ant-form-item-label {
+          label {
+            font-weight: 500;
+          }
+        }
+
+        .ant-upload {
+          background-color: #fff;
+          //   width: 100%;
+          border-radius: 4px;
+        }
+
+        .upload-area {
+          background: #f8f9fa;
+          border: 2px dashed #e9ecef;
+          border-radius: 8px;
+          padding: 1rem;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:hover {
+            border-color: var(--text-bg-primary);
+          }
+
+          .ant-upload-drag-icon {
+            color: var(--text-bg-primary);
+          }
+
+          .ant-upload-text {
+            margin: 8px 0;
+            font-size: 0.9rem;
+          }
+
+          .ant-upload-hint {
+            font-size: 0.8rem;
+            color: #666;
+          }
+        }
+
+        .form-actions {
+          margin-top: 2rem;
+          display: flex;
+          justify-content: flex-end;
+
+          .ant-btn-primary {
+            width: 180px;
+            height: 40px;
+            text-decoration: none;
+
+            &:hover {
+              background: var(--text-bg-secondary);
+            }
+          }
+        }
+      }
+    }
+
+    .illustration-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .brand-illustration {
+        max-width: 90%;
+        height: auto;
+      }
+    }
+  }
+
+  .button-group {
+    width: 100%;
+    display: flex;
+    margin-top: 20px;
+    .ant-btn {
+      width: 150px;
+      height: 40px;
+    }
+    justify-content: flex-end;
+    .ant-btn-primary {
+      text-decoration: none;
+
+      &:hover {
+        background: var(--text-bg-secondary);
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .store-details-container {
+    .store-details-content {
+      grid-template-columns: 1fr;
+
+      .illustration-section {
+        display: none;
+      }
+    }
+  }
+}

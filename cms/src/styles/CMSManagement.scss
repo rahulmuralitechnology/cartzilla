@@ -1,0 +1,50 @@
+.cms_management_page {
+  padding: 15px 24px;
+  height: calc(100vh - 64px);
+  overflow: auto;
+  .pages_card_container {
+    padding: 15px 0;
+    background: #eee6fe;
+    height: 100%;
+
+    .page_card_col {
+      .page_card {
+        cursor: pointer;
+        &:hover {
+          transform: translateY(-4px);
+          // box-shadow: 0 4px 12px rgba(87, 111, 219, 0.12);
+
+          border: 1px solid #654ea3;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+
+  .product_category_container {
+    background: #eee6fe;
+    padding-bottom: 30px;
+  }
+
+  .disount_contaienr {
+    background: #eee6fe;
+    padding-bottom: 30px;
+  }
+
+  .thumbnail {
+    height: 100px;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .new-card {
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: #000;
+  }
+}

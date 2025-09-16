@@ -1,0 +1,208 @@
+// inventory-management.scss
+
+// Variables
+$primary-color: #1890ff;
+$success-color: #52c41a;
+$warning-color: #faad14;
+$error-color: #ff4d4f;
+$text-color: #262626;
+$text-color-secondary: #8c8c8c;
+$border-color: #d9d9d9;
+$background-color: #f5f5f5;
+$card-background: #ffffff;
+$border-radius: 8px;
+$box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+// Inventory Management Layout
+.inventory-management {
+  background: $background-color;
+  min-height: 100vh;
+
+  // Header Styles
+  .inventory-header {
+    background: $card-background;
+    border-bottom: 1px solid $border-color;
+    padding: 0 24px;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 64px;
+
+      h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: $text-color;
+      }
+    }
+  }
+
+  // Content Area
+  .inventory-content {
+    padding: 24px;
+
+    // Tab Container
+    .inventory-tabs {
+      background: $card-background;
+      border-radius: $border-radius;
+      padding: 16px;
+      box-shadow: $box-shadow;
+    }
+  }
+}
+
+// Stats Cards
+.stats-cards {
+  margin-bottom: 24px;
+
+  .ant-card {
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .ant-statistic {
+      .ant-statistic-title {
+        color: $text-color-secondary;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      .ant-statistic-content {
+        color: $text-color;
+        font-size: 24px;
+        font-weight: 600;
+
+        .ant-statistic-content-value {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+      }
+    }
+  }
+}
+
+// Filters Section
+.filters-section {
+  margin-bottom: 16px;
+
+  .ant-card {
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+
+    .ant-card-body {
+      padding: 16px;
+    }
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+  }
+}
+
+// Products Table
+.products-table {
+  .ant-card {
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+  }
+
+  .ant-table {
+    .ant-table-thead > tr > th {
+      background: #fafafa;
+      font-weight: 600;
+      color: $text-color;
+      border-bottom: 2px solid $border-color;
+    }
+
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid #f0f0f0;
+
+      &:hover {
+        background: #f8f9fa;
+      }
+    }
+  }
+
+  // Product cell styling
+  .product-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .product-image {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 1px solid $border-color;
+    }
+
+    .product-info {
+      .product-title {
+        font-weight: 500;
+        margin-bottom: 2px;
+        color: $text-color;
+        line-height: 1.4;
+      }
+
+      .product-sku {
+        font-size: 12px;
+        color: $text-color-secondary;
+      }
+    }
+  }
+
+  // Stock status styling
+  .stock-status {
+    .stock-info {
+      font-size: 12px;
+      color: $text-color-secondary;
+      margin-top: 4px;
+
+      &.reserved {
+        color: $error-color;
+        font-weight: 500;
+      }
+    }
+
+    .ant-tag {
+      margin-bottom: 4px;
+      border-radius: 4px;
+      font-size: 11px;
+      padding: 2px 8px;
+
+      &.status-in-stock {
+        background: #f6ffed;
+        border-color: $success-color;
+        color: $success-color;
+      }
+
+      &.status-low-stock {
+        background: #fffbe6;
+        border-color: $warning-color;
+        color: $warning-color;
+      }
+
+      &.status-out-of-stock {
+        background: #fff2f0;
+      }
+    }
+  }
+}

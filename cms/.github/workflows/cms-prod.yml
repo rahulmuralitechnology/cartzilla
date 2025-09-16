@@ -1,0 +1,100 @@
+# name: CI/CD - CMS (prod)
+
+# on:
+#   push:
+#     branches: [ prod ]  # triggers when a PR is merged into 'prod'
+
+# concurrency:
+#   group: cms-prod
+#   cancel-in-progress: true
+
+# env:
+#   IMAGE_TAG: prod
+#   STACK_NAME: cms
+
+# jobs:
+#   build_and_push:
+#     runs-on: bloom
+#     environment: prod
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       - name: Docker login
+#         run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+#       - name: Build image (:prod)
+#         run: |
+#           docker build \
+#             -t ${{ secrets.REGISTRY_NAME }}/cms:${{ env.IMAGE_TAG }} \
+#             --build-arg VITE_API_BACKEND_API=${{ secrets.VITE_API_BACKEND_API }} \
+#             --build-arg VITE_API_ENV=prod \
+#             -f Dockerfile .
+
+#       - name: Push image (:prod)
+#         run: |
+#           docker push ${{ secrets.REGISTRY_NAME }}/cms:${{ env.IMAGE_TAG }}
+#           docker rmi -f ${{ secrets.REGISTRY_NAME }}/cms:${{ env.IMAGE_TAG }} || true
+
+#   deploy:
+#     needs: build_and_push
+#     runs-on: bloom
+#     environment: prod
+#     steps:
+#       - name: Checkout (for stack file)
+#         uses: actions/checkout@v4
+
+#       - name: Pick stack file for PROD
+#         id: pick
+#         shell: bash
+#         run: |
+#           set -e
+#           # Prefer env-specific file if you create one; else reuse dev file for now.
+#           if   [[ -f cms.prod.yml ]]; then SRC=cms.prod.yml
+#           elif [[ -f cms.yml ]]; then SRC=cms.yml
+#           elif [[ -f cms.dev.yml ]]; then SRC=cms.dev.yml
+#           else
+#             echo "No CMS stack file found (cms.prod.yml / cms.yml / cms.dev.yml)"; exit 1
+#           fi
+#           echo "SRC=$SRC" >> $GITHUB_ENV
+#           cp "$SRC" cms.rendered.yml
+
+#       - name: Upload cms.rendered.yml
+#         uses: appleboy/scp-action@v0.1.4
+#         with:
+#           host: ${{ secrets.PROD_VM_HOST }}
+#           username: ${{ secrets.VM_USER }}
+#           key: ${{ secrets.VM_SSH_KEY }}
+#           source: "cms.rendered.yml"
+#           target: "/${{ secrets.VM_USER }}/e-commerce-cms"
+
+#       - name: Swarm deploy on PROD
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.PROD_VM_HOST }}
+#           username: ${{ secrets.VM_USER }}
+#           key: ${{ secrets.VM_SSH_KEY }}
+#           envs: STACK_NAME,IMAGE_TAG
+#           script: |
+#             set -euo pipefail
+#             : "${STACK_NAME:=cms}"
+#             : "${IMAGE_TAG:=prod}"
+
+#             BASE="/${{ secrets.VM_USER }}/e-commerce-cms"
+#             cd "$BASE"
+
+#             # Canonicalize filename on server
+#             mv -f cms.rendered.yml cms.yml
+
+#             echo "${{ secrets.REGISTRY_PASSWORD }}" \
+#               | docker login ${{ secrets.REGISTRY_NAME }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
+#             docker stack deploy -c cms.yml "$STACK_NAME" --with-registry-auth
+
+#             docker service update \
+#               --with-registry-auth \
+#               --image ${{ secrets.REGISTRY_NAME }}/cms:$IMAGE_TAG \
+#               --force \
+#               ${STACK_NAME}_cms
+
+#             docker stack services "$STACK_NAME"

@@ -1,0 +1,375 @@
+.customers-page {
+  padding: 24px;
+
+  .page-header {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+  }
+
+  .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .stat-card {
+      border-radius: 8px;
+      text-align: center;
+
+      &:nth-child(1) {
+        border-top: 3px solid #1890ff;
+      }
+
+      &:nth-child(2) {
+        border-top: 3px solid #52c41a;
+      }
+
+      &:nth-child(3) {
+        border-top: 3px solid #faad14;
+      }
+
+      &:nth-child(4) {
+        border-top: 3px solid #722ed1;
+      }
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .stat-title {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 14px;
+      }
+    }
+  }
+
+  .customers-card {
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.03);
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      .search-filters {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+
+        .search-input {
+          width: 240px;
+        }
+
+        .filter-button {
+          display: flex;
+          align-items: center;
+        }
+      }
+
+      .export-button {
+        background-color: #52c41a;
+        border-color: #52c41a;
+
+        &:hover {
+          background-color: #73d13d;
+          border-color: #73d13d;
+        }
+      }
+    }
+
+    .customers-table {
+      .customer-info {
+        display: flex;
+        align-items: center;
+
+        .customer-avatar {
+          margin-right: 12px;
+          background-color: #1890ff;
+        }
+
+        .customer-details {
+          .customer-name {
+            font-weight: 500;
+          }
+
+          .customer-id {
+            color: rgba(0, 0, 0, 0.45);
+            font-size: 12px;
+          }
+        }
+      }
+
+      .contact-info {
+        .contact-email,
+        .contact-phone {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .anticon {
+            color: rgba(0, 0, 0, 0.45);
+          }
+        }
+
+        .contact-email {
+          margin-bottom: 4px;
+        }
+      }
+
+      .customer-type-tag {
+        text-transform: capitalize;
+        font-weight: 500;
+        border-radius: 4px;
+        padding: 0 8px;
+      }
+
+      .orders-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .anticon {
+          color: rgba(0, 0, 0, 0.45);
+        }
+      }
+
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+
+        &::before {
+          content: "";
+          display: inline-block;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          margin-right: 8px;
+        }
+
+        &.active {
+          &::before {
+            background-color: #52c41a;
+          }
+        }
+
+        &.inactive {
+          &::before {
+            background-color: #ff4d4f;
+          }
+        }
+      }
+
+      .action-button {
+        color: #1890ff;
+
+        &:hover {
+          color: #40a9ff;
+          background-color: rgba(24, 144, 255, 0.1);
+        }
+      }
+    }
+  }
+
+  .profile-card {
+    border: 0;
+    background-color: #fff;
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .profile-title {
+        margin-left: 16px;
+
+        h2 {
+          margin: 0;
+          font-size: 1.5rem;
+          font-weight: 600;
+        }
+
+        .ant-tag {
+          margin-top: 4px;
+        }
+      }
+    }
+
+    .profile-details {
+      .detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+
+        .detail-icon {
+          font-size: 1.2rem;
+          margin-right: 12px;
+          color: #1890ff;
+        }
+
+        .detail-label {
+          font-weight: 500;
+          color: #595959;
+        }
+
+        .detail-value {
+          margin-left: 8px;
+          color: #000;
+        }
+      }
+    }
+  }
+}
+
+.customer-address-shipping {
+  margin-top: 16px;
+
+  .address-shipping-card {
+    h4 {
+      margin-bottom: 16px;
+    }
+
+    .address-shipping-tabs {
+      .addresses-container {
+        .addresses-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 16px;
+          margin-bottom: 16px;
+
+          .address-card {
+            height: 100%;
+
+            .address-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 16px;
+
+              .address-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+
+                .anticon {
+                  color: #1890ff;
+                }
+
+                .address-type {
+                  margin-right: 8px;
+                }
+              }
+            }
+
+            .address-content {
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            }
+
+            &.add-card {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              border: 1px dashed #d9d9d9;
+
+              .add-button {
+                width: 100%;
+                height: 100%;
+              }
+            }
+          }
+        }
+
+        .address-form {
+          max-width: 600px;
+          margin: 0 auto;
+
+          .default-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+          }
+        }
+      }
+
+      .preferences-container {
+        max-width: 800px;
+      }
+
+      .history-container {
+        max-width: 800px;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .customer-address-shipping {
+    .address-shipping-card {
+      .address-shipping-tabs {
+        .addresses-container {
+          .addresses-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 992px) {
+  .customers-page {
+    .stats-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .customers-page {
+    padding: 16px;
+
+    .table-toolbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+
+      .search-filters {
+        width: 100%;
+
+        .search-input {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .customers-page {
+    .stats-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+}
